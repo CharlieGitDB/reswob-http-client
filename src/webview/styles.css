@@ -332,15 +332,28 @@ button:hover {
 
 .response {
   margin-top: 20px;
-  padding: 15px;
-  background-color: var(--vscode-editor-background);
   border: 1px solid var(--vscode-input-border);
   border-radius: 3px;
-  white-space: pre-wrap;
-  font-family: var(--vscode-editor-font-family);
-  font-size: var(--vscode-editor-font-size);
   max-height: 400px;
-  overflow-y: auto;
+  overflow: hidden;
+}
+
+.response .CodeMirror {
+  height: auto;
+  max-height: 400px;
+  background-color: var(--vscode-editor-background) !important;
+  color: var(--vscode-input-foreground) !important;
+  border: none;
+  border-radius: 3px;
+}
+
+.response .CodeMirror-gutters {
+  background-color: var(--vscode-editorGutter-background) !important;
+  border-right-color: var(--vscode-input-border) !important;
+}
+
+.response .CodeMirror-linenumber {
+  color: var(--vscode-editorLineNumber-foreground) !important;
 }
 
 .saved-request-item {

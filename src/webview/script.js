@@ -487,6 +487,86 @@ window.addEventListener('message', (event) => {
 
 function displayResponse(response) {
   const responseDiv = document.getElementById('response');
-  responseDiv.textContent = JSON.stringify(response, null, 2);
+
+  // Clear any existing content
+  responseDiv.innerHTML = '';
   responseDiv.style.display = 'block';
+
+  // Determine content type and format response
+  let responseContent = '';
+  let contentMode = 'application/json'; // Default to JSON mode
+
+  try {
+    if (response.error) {
+      // Handle error responses
+      responseContent = JSON.stringify({ error: response.error }, null, 2);
+    } else if (typeof response === 'string') {
+      // Handle string responses - try to detect content type
+      const trimmedResponse = response.trim();
+
+      if (
+        trimmedResponse.startsWith('<') &&
+        (trimmedResponse.includes('<html') || trimmedResponse.includes('<!DOCTYPE'))
+      ) {
+        // HTML content
+        responseContent = response;
+        contentMode = 'text/html';
+      } else if (trimmedResponse.startsWith('<') && trimmedResponse.endsWith('>')) {
+        // XML content
+        responseContent = response;
+        contentMode = 'application/xml';
+      } else if (trimmedResponse.includes('{') && trimmedResponse.includes('}')) {
+        // Likely JSON, try to parse and format
+        try {
+          const parsedJson = JSON.parse(response);
+          responseContent = JSON.stringify(parsedJson, null, 2);
+        } catch {
+          // Not valid JSON, display as plain text
+          responseContent = response;
+          contentMode = 'text/plain';
+        }
+      } else {
+        // Plain text
+        responseContent = response;
+        contentMode = 'text/plain';
+      }
+    } else if (typeof response === 'object' && response !== null) {
+      // Handle object responses (most common case)
+      responseContent = JSON.stringify(response, null, 2);
+    } else {
+      // Handle other types
+      responseContent = String(response);
+      contentMode = 'text/plain';
+    }
+  } catch (error) {
+    // Fallback for any unexpected errors
+    responseContent = JSON.stringify(
+      { error: 'Failed to parse response', details: String(response) },
+      null,
+      2
+    );
+  }
+
+  // Create a CodeMirror instance for the response
+  const responseEditor = CodeMirror(responseDiv, {
+    mode: contentMode,
+    theme: 'default',
+    lineNumbers: true,
+    lineWrapping: true,
+    value: responseContent,
+    readOnly: true,
+    foldGutter: ['application/json', 'application/xml', 'text/html'].includes(contentMode),
+    gutters: ['application/json', 'application/xml', 'text/html'].includes(contentMode)
+      ? ['CodeMirror-linenumbers', 'CodeMirror-foldgutter']
+      : ['CodeMirror-linenumbers'],
+    autoCloseBrackets: false,
+    matchBrackets: ['application/json', 'application/xml', 'text/html'].includes(contentMode),
+    indentUnit: 2,
+    tabSize: 2,
+  });
+
+  // Make sure the editor refreshes properly
+  setTimeout(() => {
+    responseEditor.refresh();
+  }, 100);
 }
