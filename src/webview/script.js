@@ -1,5 +1,8 @@
 const vscode = acquireVsCodeApi();
 
+// CodeMirror editors
+let headersEditor, bodyEditor;
+
 // Vim mode state
 let vimMode = false;
 let vimInsertMode = false;
@@ -8,8 +11,74 @@ let currentSection = 'form'; // 'form' or 'saved'
 let savedRequestIndex = 0;
 const focusableElements = ['method', 'url', 'headers', 'body'];
 
+// Initialize CodeMirror editors
+function initializeCodeMirror() {
+    // Headers editor (JSON)
+    headersEditor = CodeMirror(document.getElementById('headers'), {
+        mode: 'application/json',
+        theme: 'default',
+        lineNumbers: true,
+        lineWrapping: true,
+        value: '{"Content-Type": "application/json"}',
+        placeholder: '{"Content-Type": "application/json"}',
+        autoCloseBrackets: true,
+        matchBrackets: true,
+        indentUnit: 2,
+        tabSize: 2,
+        foldGutter: true,
+        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+    });
+
+    // Body editor (JSON)
+    bodyEditor = CodeMirror(document.getElementById('body'), {
+        mode: 'application/json',
+        theme: 'default',
+        lineNumbers: true,
+        lineWrapping: true,
+        value: '{"key": "value"}',
+        placeholder: '{"key": "value"}',
+        autoCloseBrackets: true,
+        matchBrackets: true,
+        indentUnit: 2,
+        tabSize: 2,
+        foldGutter: true,
+        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+    });
+
+    // Clear initial placeholder values
+    headersEditor.setValue('');
+    bodyEditor.setValue('');
+
+    // Add validation feedback
+    headersEditor.on('change', function() {
+        validateJSON(headersEditor);
+    });
+
+    bodyEditor.on('change', function() {
+        validateJSON(bodyEditor);
+    });
+}
+
+// Validate JSON and provide visual feedback
+function validateJSON(editor) {
+    const value = editor.getValue().trim();
+    if (value === '') {
+        return;
+    }
+
+    try {
+        JSON.parse(value);
+        // Valid JSON - remove error styling
+        editor.getWrapperElement().classList.remove('json-error');
+    } catch (e) {
+        // Invalid JSON - add error styling
+        editor.getWrapperElement().classList.add('json-error');
+    }
+}
+
 // Load saved requests on startup
 window.addEventListener('load', () => {
+    initializeCodeMirror();
     loadSavedRequests();
     initializeVimMode();
 });
@@ -234,9 +303,22 @@ function focusElement(index) {
         element.classList.add('vim-mode-active');
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         
-        // For buttons, also focus them
-        if (element.tagName === 'BUTTON') {
-            element.focus();
+        // Handle CodeMirror editors
+        if (elementId === 'headers' && headersEditor) {
+            headersEditor.getWrapperElement().classList.add('vim-mode-active');
+            if (vimInsertMode) {
+                headersEditor.focus();
+            }
+        } else if (elementId === 'body' && bodyEditor) {
+            bodyEditor.getWrapperElement().classList.add('vim-mode-active');
+            if (vimInsertMode) {
+                bodyEditor.focus();
+            }
+        } else {
+            // For buttons, also focus them
+            if (element.tagName === 'BUTTON') {
+                element.focus();
+            }
         }
     }
 }
@@ -244,7 +326,18 @@ function focusElement(index) {
 function enterInsertMode() {
     const elementId = focusableElements[currentFocusIndex];
     const element = document.getElementById(elementId);
-    if (element && (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.tagName === 'SELECT')) {
+    
+    if (elementId === 'headers' && headersEditor) {
+        vimInsertMode = true;
+        updateVimModeIndicator();
+        headersEditor.focus();
+        headersEditor.getWrapperElement().classList.remove('vim-mode-active');
+    } else if (elementId === 'body' && bodyEditor) {
+        vimInsertMode = true;
+        updateVimModeIndicator();
+        bodyEditor.focus();
+        bodyEditor.getWrapperElement().classList.remove('vim-mode-active');
+    } else if (element && (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.tagName === 'SELECT')) {
         vimInsertMode = true;
         updateVimModeIndicator();
         element.focus();
@@ -260,8 +353,8 @@ function toggleVimHelp() {
 function sendRequest() {
     const method = document.getElementById('method').value;
     const url = document.getElementById('url').value;
-    const headers = document.getElementById('headers').value;
-    const body = document.getElementById('body').value;
+    const headers = headersEditor.getValue();
+    const body = bodyEditor.getValue();
     
     if (!url.trim()) {
         alert('Please enter a URL');
@@ -288,8 +381,8 @@ function sendRequest() {
 function saveRequest() {
     const method = document.getElementById('method').value;
     const url = document.getElementById('url').value;
-    const headers = document.getElementById('headers').value;
-    const body = document.getElementById('body').value;
+    const headers = headersEditor.getValue();
+    const body = bodyEditor.getValue();
     
     if (!url.trim()) {
         alert('Please enter a URL to save');
@@ -322,8 +415,8 @@ function loadSavedRequests() {
 function loadRequest(request) {
     document.getElementById('method').value = request.method;
     document.getElementById('url').value = request.url;
-    document.getElementById('headers').value = JSON.stringify(request.headers, null, 2);
-    document.getElementById('body').value = request.body || '';
+    headersEditor.setValue(JSON.stringify(request.headers, null, 2));
+    bodyEditor.setValue(request.body || '');
 }
 
 function deleteRequest(name) {

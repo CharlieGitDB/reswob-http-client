@@ -196,6 +196,101 @@ select, input, textarea {
     box-sizing: border-box;
 }
 
+/* CodeMirror syntax highlighting styles */
+.CodeMirror {
+    border: 1px solid var(--vscode-input-border);
+    background-color: var(--vscode-input-background) !important;
+    color: var(--vscode-input-foreground) !important;
+    border-radius: 3px;
+    font-family: var(--vscode-editor-font-family);
+    font-size: var(--vscode-editor-font-size);
+    height: auto;
+    min-height: 100px;
+}
+
+.CodeMirror-focused {
+    border-color: var(--vscode-focusBorder);
+}
+
+.CodeMirror-cursor {
+    border-left-color: var(--vscode-editorCursor-foreground) !important;
+}
+
+.CodeMirror-selected {
+    background-color: var(--vscode-editor-selectionBackground) !important;
+}
+
+.CodeMirror-line {
+    background: transparent !important;
+}
+
+/* JSON syntax highlighting */
+.cm-string { color: #ce9178 !important; } /* Use a nice orange for strings */
+.cm-number { color: #b5cea8 !important; } /* Light green for numbers */
+.cm-atom { color: #569cd6 !important; } /* Blue for booleans/null */
+.cm-keyword { color: #c586c0 !important; } /* Purple for keywords */
+.cm-variable { color: var(--vscode-debugTokenExpression-value, #9cdcfe) !important; } /* Light blue for variables */
+.cm-property { color: #9cdcfe !important; } /* Light blue for property names */
+.cm-punctuation { color: var(--vscode-input-foreground) !important; }
+
+/* Fallback colors for better contrast in different themes */
+.CodeMirror-line {
+    color: var(--vscode-input-foreground) !important;
+}
+
+/* Error highlighting */
+.cm-error {
+    color: var(--vscode-errorForeground, #f44747) !important;
+    text-decoration: underline;
+}
+
+.CodeMirror-gutters {
+    background-color: var(--vscode-editorGutter-background) !important;
+    border-right-color: var(--vscode-input-border) !important;
+}
+
+.CodeMirror-linenumber {
+    color: var(--vscode-editorLineNumber-foreground) !important;
+}
+
+.CodeMirror-foldgutter {
+    width: 12px;
+}
+
+.CodeMirror-foldgutter-open,
+.CodeMirror-foldgutter-folded {
+    cursor: pointer;
+    color: var(--vscode-editorLineNumber-foreground) !important;
+}
+
+.CodeMirror-foldgutter-open:after {
+    content: "▼";
+}
+
+.CodeMirror-foldgutter-folded:after {
+    content: "▶";
+}
+
+#headers .CodeMirror {
+    height: 120px;
+}
+
+#body .CodeMirror {
+    height: 180px;
+}
+
+/* Vim mode styles for CodeMirror */
+.CodeMirror.vim-mode-active {
+    border-color: var(--vscode-focusBorder) !important;
+    box-shadow: 0 0 0 1px var(--vscode-focusBorder);
+}
+
+/* JSON validation error styling */
+.CodeMirror.json-error {
+    border-color: var(--vscode-errorForeground, #f44747) !important;
+    box-shadow: 0 0 0 1px var(--vscode-errorForeground, #f44747);
+}
+
 button {
     background-color: var(--vscode-button-background);
     color: var(--vscode-button-foreground);
