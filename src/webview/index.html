@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTP Client</title>
+    <link rel="stylesheet" href="{{cssUri}}">
+</head>
+<body>
+    <div class="container">
+        <div class="vim-mode-toggle">
+            <label class="toggle-switch">
+                <input type="checkbox" id="vimModeToggle">
+                <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label">Vim Mode</span>
+            <div class="vim-help" id="vimHelp" style="display: none;">
+                <strong>Vim Commands:</strong>
+                <ul>
+                    <li><kbd>j/k</kbd> - Move down/up within current section</li>
+                    <li><kbd>h/l</kbd> - Switch between form (h) and saved requests (l)</li>
+                    <li><kbd>Tab</kbd> - Focus next field</li>
+                    <li><kbd>Shift+Tab</kbd> - Focus previous field</li>
+                    <li><kbd>i</kbd> - Enter insert mode (edit field)</li>
+                    <li><kbd>Esc</kbd> - Exit insert mode</li>
+                    <li><kbd>Enter</kbd> - Send request (form) / Load request (saved)</li>
+                    <li><kbd>s</kbd> - Save current request</li>
+                    <li><kbd>r</kbd> - Refresh saved requests</li>
+                    <li><kbd>d</kbd> - Delete selected saved request</li>
+                    <li><kbd>?</kbd> - Toggle this help</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="header">
+            <h1>HTTP Client</h1>
+            <div class="button-group">
+                <button onclick="saveRequest()" class="secondary-button">💾 Save Request</button>
+                <button onclick="loadSavedRequests()">📁 Refresh Saved</button>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="request-form">
+                <div class="form-group">
+                    <label for="method">Method:</label>
+                    <select id="method">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                        <option value="PATCH">PATCH</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="url">URL:</label>
+                    <input type="text" id="url" placeholder="https://api.example.com/endpoint" />
+                </div>
+                
+                <div class="form-group">
+                    <label for="headers">Headers (JSON):</label>
+                    <textarea id="headers" rows="4" placeholder='{"Content-Type": "application/json"}'></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="body">Body:</label>
+                    <textarea id="body" rows="6" placeholder='{"key": "value"}'></textarea>
+                </div>
+                
+                <button onclick="sendRequest()">🚀 Send Request</button>
+                
+                <div id="response" class="response" style="display: none;"></div>
+            </div>
+            
+            <div class="saved-requests">
+                <h3>Saved Requests</h3>
+                <div id="savedRequestsList">
+                    <p>Loading saved requests...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{scriptUri}}"></script>
+</body>
+</html>

@@ -96,6 +96,12 @@ your-project/
 ├── .reswob-requests/
 │   └── requests.json          # All saved requests
 ├── src/
+│   ├── extension.ts           # Main extension logic
+│   ├── webviewContent.ts      # Webview content loader
+│   └── webview/
+│       ├── index.html         # Webview HTML structure
+│       ├── styles.css         # Webview CSS styles
+│       └── script.js          # Webview JavaScript logic
 ├── package.json
 └── README.md
 \`\`\`
