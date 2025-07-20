@@ -1,371 +1,387 @@
 body {
-    font-family: var(--vscode-font-family);
-    font-size: var(--vscode-font-size);
-    color: var(--vscode-foreground);
-    background-color: var(--vscode-editor-background);
-    margin: 0;
-    padding: 20px;
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-foreground);
+  background-color: var(--vscode-editor-background);
+  margin: 0;
+  padding: 20px;
 }
 
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .vim-mode-toggle {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--vscode-input-border);
-    margin-bottom: 15px;
-    position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--vscode-input-border);
+  margin-bottom: 15px;
+  position: relative;
 }
 
 .toggle-switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 24px;
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
 }
 
 .toggle-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
 .toggle-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--vscode-input-background);
-    border: 1px solid var(--vscode-input-border);
-    transition: 0.3s;
-    border-radius: 24px;
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border);
+  transition: 0.3s;
+  border-radius: 24px;
 }
 
 .toggle-slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 2px;
-    bottom: 2px;
-    background-color: var(--vscode-foreground);
-    transition: 0.3s;
-    border-radius: 50%;
+  position: absolute;
+  content: '';
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: var(--vscode-foreground);
+  transition: 0.3s;
+  border-radius: 50%;
 }
 
 input:checked + .toggle-slider {
-    background-color: var(--vscode-button-background);
+  background-color: var(--vscode-button-background);
 }
 
 input:checked + .toggle-slider:before {
-    transform: translateX(26px);
-    background-color: var(--vscode-button-foreground);
+  transform: translateX(26px);
+  background-color: var(--vscode-button-foreground);
 }
 
 .toggle-label {
-    font-weight: bold;
-    color: var(--vscode-foreground);
-    font-size: 14px;
+  font-weight: bold;
+  color: var(--vscode-foreground);
+  font-size: 14px;
 }
 
 .toggle-label.vim-enabled {
-    color: var(--vscode-charts-green);
+  color: var(--vscode-charts-green);
 }
 
 .vim-help {
-    position: absolute;
-    top: 40px;
-    left: 0;
-    background-color: var(--vscode-editor-background);
-    border: 1px solid var(--vscode-input-border);
-    border-radius: 3px;
-    padding: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 100;
-    min-width: 300px;
+  position: absolute;
+  top: 40px;
+  left: 0;
+  background-color: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 3px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  min-width: 300px;
 }
 
 .vim-help ul {
-    margin: 5px 0;
-    padding-left: 20px;
+  margin: 5px 0;
+  padding-left: 20px;
 }
 
 .vim-help li {
-    margin-bottom: 5px;
-    font-size: 12px;
+  margin-bottom: 5px;
+  font-size: 12px;
 }
 
 .vim-help kbd {
-    background-color: var(--vscode-input-background);
-    border: 1px solid var(--vscode-input-border);
-    border-radius: 2px;
-    padding: 2px 4px;
-    font-family: monospace;
-    font-size: 11px;
+  background-color: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 2px;
+  padding: 2px 4px;
+  font-family: monospace;
+  font-size: 11px;
 }
 
 /* Vim mode visual feedback */
 .vim-mode-active {
-    outline: 2px solid var(--vscode-focusBorder);
-    outline-offset: 2px;
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
 }
 
 .vim-mode-insert::before {
-    content: "-- INSERT --";
-    position: fixed;
-    bottom: 10px;
-    left: 10px;
-    background-color: var(--vscode-button-background);
-    color: var(--vscode-button-foreground);
-    padding: 4px 8px;
-    border-radius: 3px;
-    font-size: 12px;
-    z-index: 1000;
+  content: '-- INSERT --';
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  z-index: 1000;
 }
 
 .vim-mode-normal::before {
-    content: "-- NORMAL --";
-    position: fixed;
-    bottom: 10px;
-    left: 10px;
-    background-color: var(--vscode-textLink-foreground);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 3px;
-    font-size: 12px;
-    z-index: 1000;
+  content: '-- NORMAL --';
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  background-color: var(--vscode-textLink-foreground);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  z-index: 1000;
 }
 
 .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    border-bottom: 1px solid var(--vscode-input-border);
-    padding-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--vscode-input-border);
+  padding-bottom: 15px;
 }
 
 .button-group {
-    display: flex;
-    gap: 10px;
+  display: flex;
+  gap: 10px;
 }
 
 .main-content {
-    display: flex;
-    gap: 20px;
+  display: flex;
+  gap: 20px;
 }
 
 .request-form {
-    flex: 2;
+  flex: 2;
 }
 
 .saved-requests {
-    flex: 1;
-    background-color: var(--vscode-sideBar-background);
-    border: 1px solid var(--vscode-input-border);
-    border-radius: 3px;
-    padding: 15px;
-    max-height: 600px;
-    overflow-y: auto;
+  flex: 1;
+  background-color: var(--vscode-sideBar-background);
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 3px;
+  padding: 15px;
+  max-height: 600px;
+  overflow-y: auto;
 }
 
 .form-group {
-    margin-bottom: 15px;
+  margin-bottom: 15px;
 }
 
 label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
 }
 
-select, input, textarea {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid var(--vscode-input-border);
-    background-color: var(--vscode-input-background);
-    color: var(--vscode-input-foreground);
-    border-radius: 3px;
-    box-sizing: border-box;
+select,
+input,
+textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--vscode-input-border);
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border-radius: 3px;
+  box-sizing: border-box;
 }
 
 /* CodeMirror syntax highlighting styles */
 .CodeMirror {
-    border: 1px solid var(--vscode-input-border);
-    background-color: var(--vscode-input-background) !important;
-    color: var(--vscode-input-foreground) !important;
-    border-radius: 3px;
-    font-family: var(--vscode-editor-font-family);
-    font-size: var(--vscode-editor-font-size);
-    height: auto;
-    min-height: 100px;
+  border: 1px solid var(--vscode-input-border);
+  background-color: var(--vscode-input-background) !important;
+  color: var(--vscode-input-foreground) !important;
+  border-radius: 3px;
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--vscode-editor-font-size);
+  height: auto;
+  min-height: 100px;
 }
 
 .CodeMirror-focused {
-    border-color: var(--vscode-focusBorder);
+  border-color: var(--vscode-focusBorder);
 }
 
 .CodeMirror-cursor {
-    border-left-color: var(--vscode-editorCursor-foreground) !important;
+  border-left-color: var(--vscode-editorCursor-foreground) !important;
 }
 
 .CodeMirror-selected {
-    background-color: var(--vscode-editor-selectionBackground) !important;
+  background-color: var(--vscode-editor-selectionBackground) !important;
 }
 
 .CodeMirror-line {
-    background: transparent !important;
+  background: transparent !important;
 }
 
 /* JSON syntax highlighting */
-.cm-string { color: #ce9178 !important; } /* Use a nice orange for strings */
-.cm-number { color: #b5cea8 !important; } /* Light green for numbers */
-.cm-atom { color: #569cd6 !important; } /* Blue for booleans/null */
-.cm-keyword { color: #c586c0 !important; } /* Purple for keywords */
-.cm-variable { color: var(--vscode-debugTokenExpression-value, #9cdcfe) !important; } /* Light blue for variables */
-.cm-property { color: #9cdcfe !important; } /* Light blue for property names */
-.cm-punctuation { color: var(--vscode-input-foreground) !important; }
+.cm-string {
+  color: #ce9178 !important;
+} /* Use a nice orange for strings */
+.cm-number {
+  color: #b5cea8 !important;
+} /* Light green for numbers */
+.cm-atom {
+  color: #569cd6 !important;
+} /* Blue for booleans/null */
+.cm-keyword {
+  color: #c586c0 !important;
+} /* Purple for keywords */
+.cm-variable {
+  color: var(--vscode-debugTokenExpression-value, #9cdcfe) !important;
+} /* Light blue for variables */
+.cm-property {
+  color: #9cdcfe !important;
+} /* Light blue for property names */
+.cm-punctuation {
+  color: var(--vscode-input-foreground) !important;
+}
 
 /* Fallback colors for better contrast in different themes */
 .CodeMirror-line {
-    color: var(--vscode-input-foreground) !important;
+  color: var(--vscode-input-foreground) !important;
 }
 
 /* Error highlighting */
 .cm-error {
-    color: var(--vscode-errorForeground, #f44747) !important;
-    text-decoration: underline;
+  color: var(--vscode-errorForeground, #f44747) !important;
+  text-decoration: underline;
 }
 
 .CodeMirror-gutters {
-    background-color: var(--vscode-editorGutter-background) !important;
-    border-right-color: var(--vscode-input-border) !important;
+  background-color: var(--vscode-editorGutter-background) !important;
+  border-right-color: var(--vscode-input-border) !important;
 }
 
 .CodeMirror-linenumber {
-    color: var(--vscode-editorLineNumber-foreground) !important;
+  color: var(--vscode-editorLineNumber-foreground) !important;
 }
 
 .CodeMirror-foldgutter {
-    width: 12px;
+  width: 12px;
 }
 
 .CodeMirror-foldgutter-open,
 .CodeMirror-foldgutter-folded {
-    cursor: pointer;
-    color: var(--vscode-editorLineNumber-foreground) !important;
+  cursor: pointer;
+  color: var(--vscode-editorLineNumber-foreground) !important;
 }
 
 .CodeMirror-foldgutter-open:after {
-    content: "▼";
+  content: '▼';
 }
 
 .CodeMirror-foldgutter-folded:after {
-    content: "▶";
+  content: '▶';
 }
 
 #headers .CodeMirror {
-    height: 120px;
+  height: 120px;
 }
 
 #body .CodeMirror {
-    height: 180px;
+  height: 180px;
 }
 
 /* Vim mode styles for CodeMirror */
 .CodeMirror.vim-mode-active {
-    border-color: var(--vscode-focusBorder) !important;
-    box-shadow: 0 0 0 1px var(--vscode-focusBorder);
+  border-color: var(--vscode-focusBorder) !important;
+  box-shadow: 0 0 0 1px var(--vscode-focusBorder);
 }
 
 /* JSON validation error styling */
 .CodeMirror.json-error {
-    border-color: var(--vscode-errorForeground, #f44747) !important;
-    box-shadow: 0 0 0 1px var(--vscode-errorForeground, #f44747);
+  border-color: var(--vscode-errorForeground, #f44747) !important;
+  box-shadow: 0 0 0 1px var(--vscode-errorForeground, #f44747);
 }
 
 button {
-    background-color: var(--vscode-button-background);
-    color: var(--vscode-button-foreground);
-    border: none;
-    padding: 10px 20px;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 14px;
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
 }
 
 button:hover {
-    background-color: var(--vscode-button-hoverBackground);
+  background-color: var(--vscode-button-hoverBackground);
 }
 
 .secondary-button {
-    background-color: var(--vscode-button-secondaryBackground);
-    color: var(--vscode-button-secondaryForeground);
+  background-color: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
 }
 
 .secondary-button:hover {
-    background-color: var(--vscode-button-secondaryHoverBackground);
+  background-color: var(--vscode-button-secondaryHoverBackground);
 }
 
 .response {
-    margin-top: 20px;
-    padding: 15px;
-    background-color: var(--vscode-editor-background);
-    border: 1px solid var(--vscode-input-border);
-    border-radius: 3px;
-    white-space: pre-wrap;
-    font-family: var(--vscode-editor-font-family);
-    font-size: var(--vscode-editor-font-size);
-    max-height: 400px;
-    overflow-y: auto;
+  margin-top: 20px;
+  padding: 15px;
+  background-color: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 3px;
+  white-space: pre-wrap;
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--vscode-editor-font-size);
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .saved-request-item {
-    padding: 8px;
-    margin-bottom: 5px;
-    border: 1px solid var(--vscode-input-border);
-    border-radius: 3px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  padding: 8px;
+  margin-bottom: 5px;
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .saved-request-item:hover {
-    background-color: var(--vscode-list-hoverBackground);
+  background-color: var(--vscode-list-hoverBackground);
 }
 
 .saved-request-info {
-    flex: 1;
+  flex: 1;
 }
 
 .saved-request-method {
-    font-weight: bold;
-    color: var(--vscode-textLink-foreground);
+  font-weight: bold;
+  color: var(--vscode-textLink-foreground);
 }
 
 .saved-request-url {
-    font-size: 12px;
-    color: var(--vscode-descriptionForeground);
-    margin-top: 2px;
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  margin-top: 2px;
 }
 
 .delete-button {
-    background-color: var(--vscode-errorForeground);
-    color: white;
-    padding: 4px 8px;
-    font-size: 12px;
-    border-radius: 2px;
+  background-color: var(--vscode-errorForeground);
+  color: white;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 2px;
 }
 
 .delete-button:hover {
-    background-color: var(--vscode-errorForeground);
-    opacity: 0.8;
+  background-color: var(--vscode-errorForeground);
+  opacity: 0.8;
 }

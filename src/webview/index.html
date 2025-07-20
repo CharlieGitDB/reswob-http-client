@@ -1,13 +1,22 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HTTP Client</title>
-    <link rel="stylesheet" href="{{cssUri}}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.css">
+    <link rel="stylesheet" href="{{cssUri}}" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.css"
+    />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
@@ -15,83 +24,83 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/brace-fold.min.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="vim-mode-toggle">
-            <label class="toggle-switch">
-                <input type="checkbox" id="vimModeToggle">
-                <span class="toggle-slider"></span>
-            </label>
-            <span class="toggle-label">Vim Mode</span>
-            <div class="vim-help" id="vimHelp" style="display: none;">
-                <strong>Vim Commands:</strong>
-                <ul>
-                    <li><kbd>j/k</kbd> - Move down/up within current section</li>
-                    <li><kbd>h/l</kbd> - Switch between form (h) and saved requests (l)</li>
-                    <li><kbd>Tab</kbd> - Focus next field</li>
-                    <li><kbd>Shift+Tab</kbd> - Focus previous field</li>
-                    <li><kbd>i</kbd> - Enter insert mode (edit field)</li>
-                    <li><kbd>Esc</kbd> - Exit insert mode</li>
-                    <li><kbd>Enter</kbd> - Send request (form) / Load request (saved)</li>
-                    <li><kbd>s</kbd> - Save current request</li>
-                    <li><kbd>r</kbd> - Refresh saved requests</li>
-                    <li><kbd>d</kbd> - Delete selected saved request</li>
-                    <li><kbd>?</kbd> - Toggle this help</li>
-                </ul>
-            </div>
+      <div class="vim-mode-toggle">
+        <label class="toggle-switch">
+          <input type="checkbox" id="vimModeToggle" />
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Vim Mode</span>
+        <div class="vim-help" id="vimHelp" style="display: none">
+          <strong>Vim Commands:</strong>
+          <ul>
+            <li><kbd>j/k</kbd> - Move down/up within current section</li>
+            <li><kbd>h/l</kbd> - Switch between form (h) and saved requests (l)</li>
+            <li><kbd>Tab</kbd> - Focus next field</li>
+            <li><kbd>Shift+Tab</kbd> - Focus previous field</li>
+            <li><kbd>i</kbd> - Enter insert mode (edit field)</li>
+            <li><kbd>Esc</kbd> - Exit insert mode</li>
+            <li><kbd>Enter</kbd> - Send request (form) / Load request (saved)</li>
+            <li><kbd>s</kbd> - Save current request</li>
+            <li><kbd>r</kbd> - Refresh saved requests</li>
+            <li><kbd>d</kbd> - Delete selected saved request</li>
+            <li><kbd>?</kbd> - Toggle this help</li>
+          </ul>
         </div>
-        
-        <div class="header">
-            <h1>HTTP Client</h1>
-            <div class="button-group">
-                <button onclick="saveRequest()" class="secondary-button">💾 Save Request</button>
-                <button onclick="loadSavedRequests()">📁 Refresh Saved</button>
-            </div>
+      </div>
+
+      <div class="header">
+        <h1>HTTP Client</h1>
+        <div class="button-group">
+          <button onclick="saveRequest()" class="secondary-button">💾 Save Request</button>
+          <button onclick="loadSavedRequests()">📁 Refresh Saved</button>
         </div>
-        
-        <div class="main-content">
-            <div class="request-form">
-                <div class="form-group">
-                    <label for="method">Method:</label>
-                    <select id="method">
-                        <option value="GET">GET</option>
-                        <option value="POST">POST</option>
-                        <option value="PUT">PUT</option>
-                        <option value="DELETE">DELETE</option>
-                        <option value="PATCH">PATCH</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="url">URL:</label>
-                    <input type="text" id="url" placeholder="https://api.example.com/endpoint" />
-                </div>
-                
-                <div class="form-group">
-                    <label for="headers">Headers (JSON):</label>
-                    <div id="headers"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="body">Body:</label>
-                    <div id="body"></div>
-                </div>
-                
-                <button onclick="sendRequest()">🚀 Send Request</button>
-                
-                <div id="response" class="response" style="display: none;"></div>
-            </div>
-            
-            <div class="saved-requests">
-                <h3>Saved Requests</h3>
-                <div id="savedRequestsList">
-                    <p>Loading saved requests...</p>
-                </div>
-            </div>
+      </div>
+
+      <div class="main-content">
+        <div class="request-form">
+          <div class="form-group">
+            <label for="method">Method:</label>
+            <select id="method">
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PUT">PUT</option>
+              <option value="DELETE">DELETE</option>
+              <option value="PATCH">PATCH</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="url">URL:</label>
+            <input type="text" id="url" placeholder="https://api.example.com/endpoint" />
+          </div>
+
+          <div class="form-group">
+            <label for="headers">Headers (JSON):</label>
+            <div id="headers"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="body">Body:</label>
+            <div id="body"></div>
+          </div>
+
+          <button onclick="sendRequest()">🚀 Send Request</button>
+
+          <div id="response" class="response" style="display: none"></div>
         </div>
+
+        <div class="saved-requests">
+          <h3>Saved Requests</h3>
+          <div id="savedRequestsList">
+            <p>Loading saved requests...</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script src="{{scriptUri}}"></script>
-</body>
+  </body>
 </html>
