@@ -16,8 +16,64 @@
       {
         "command": "reswob-http-client.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "reswob-http-client.openHttpClient",
+        "title": "Open HTTP Client"
+      },
+      {
+        "command": "reswob-http-client.saveRequest",
+        "title": "Save Request"
+      },
+      {
+        "command": "reswob-http-client.loadRequest",
+        "title": "Load Request"
+      },
+      {
+        "command": "reswob-http-client.exportRequests",
+        "title": "Export All Requests"
+      },
+      {
+        "command": "reswob-http-client.importRequests",
+        "title": "Import Requests"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "reswob-http-client",
+          "title": "Reswob HTTP Client",
+          "icon": "$(globe)"
+        }
+      ]
+    },
+    "views": {
+      "reswob-http-client": [
+        {
+          "id": "reswobHttpClientView",
+          "name": "HTTP Client",
+          "when": "true"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "reswob-http-client.loadRequest",
+          "when": "view == reswobHttpClientView && viewItem == saved-request"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "reswob-http-client.exportRequests",
+          "when": "true"
+        },
+        {
+          "command": "reswob-http-client.importRequests",
+          "when": "true"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
