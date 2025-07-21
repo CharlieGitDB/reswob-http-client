@@ -46,7 +46,7 @@ Reswob HTTP Client is a comprehensive VS Code extension that allows developers t
 
 1. Install the extension
 2. Click the globe icon (🌐) in the Activity Bar to open the HTTP Client
-3. Use "Open HTTP Client" command or click "+ New Request" in the sidebar
+3. Use "Open HTTP Client" command or click "New Request" in the sidebar
 4. Fill in your request details and click "Send"
 5. Save frequently used requests with the "💾 Save Request" button
 

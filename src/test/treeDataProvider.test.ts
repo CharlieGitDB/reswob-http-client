@@ -21,7 +21,7 @@ class MockReswobHttpClientViewProvider implements vscode.TreeDataProvider<string
 
   getTreeItem(element: string): vscode.TreeItem {
     if (element === 'new-request') {
-      const item = new vscode.TreeItem('+ New Request', vscode.TreeItemCollapsibleState.None);
+      const item = new vscode.TreeItem('New Request', vscode.TreeItemCollapsibleState.None);
       item.command = {
         command: 'reswob-http-client.openHttpClient',
         title: 'Open HTTP Client',
@@ -71,7 +71,7 @@ suite('TreeDataProvider Test Suite', () => {
   test('getTreeItem creates correct new request item', () => {
     const item = treeProvider.getTreeItem('new-request');
 
-    assert.strictEqual(item.label, '+ New Request');
+    assert.strictEqual(item.label, 'New Request');
     assert.strictEqual(item.collapsibleState, vscode.TreeItemCollapsibleState.None);
     assert.ok(item.command);
     assert.strictEqual(item.command!.command, 'reswob-http-client.openHttpClient');

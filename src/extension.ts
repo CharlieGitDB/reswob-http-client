@@ -133,7 +133,7 @@ export class ReswobHttpClientViewProvider implements vscode.TreeDataProvider<str
 
   getTreeItem(element: string): vscode.TreeItem {
     if (element === 'new-request') {
-      const item = new vscode.TreeItem('+ New Request', vscode.TreeItemCollapsibleState.None);
+      const item = new vscode.TreeItem('New Request', vscode.TreeItemCollapsibleState.None);
       item.command = {
         command: 'reswob-http-client.openHttpClient',
         title: 'Open HTTP Client',

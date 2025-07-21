@@ -23,7 +23,7 @@ The Reswob HTTP Client extension now supports saving, importing, and exporting H
 
 - Click the globe icon in the activity bar to open the Reswob HTTP Client
 - The sidebar shows:
-  - "+ New Request" - opens a blank HTTP client
+  - "New Request" - opens a blank HTTP client
   - List of all saved requests
 - Click on any saved request to load and edit it
 
