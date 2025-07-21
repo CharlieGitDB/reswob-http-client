@@ -3,6 +3,7 @@
   "displayName": "reswob-http-client",
   "description": "Http client",
   "version": "1.0.0",
+  "publisher": "reswob",
   "license": "GPL-3.0",
   "repository": {
     "type": "git",
