@@ -3,6 +3,7 @@
   "displayName": "reswob-http-client",
   "description": "Http client",
   "version": "0.0.1",
+  "license": "GPL-3.0",
   "engines": {
     "vscode": "^1.102.0"
   },
