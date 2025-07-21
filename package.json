@@ -2,7 +2,7 @@
   "name": "reswob-http-client",
   "displayName": "reswob-http-client",
   "description": "Http client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "reswob",
   "license": "GPL-3.0",
   "repository": {

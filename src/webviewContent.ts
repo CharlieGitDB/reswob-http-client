@@ -4,7 +4,7 @@ import * as path from 'path';
 
 export function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): string {
   // Get the local paths to the webview files
-  const webviewPath = vscode.Uri.joinPath(extensionUri, 'src', 'webview');
+  const webviewPath = vscode.Uri.joinPath(extensionUri, 'dist', 'webview');
   const htmlPath = vscode.Uri.joinPath(webviewPath, 'index.html');
   const cssPath = vscode.Uri.joinPath(webviewPath, 'styles.css');
   const scriptPath = vscode.Uri.joinPath(webviewPath, 'script.js');

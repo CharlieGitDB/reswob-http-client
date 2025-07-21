@@ -1,7 +1,38 @@
 const esbuild = require('esbuild');
+const fs = require('fs');
+const path = require('path');
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
+
+/**
+ * @type {import('esbuild').Plugin}
+ */
+const copyWebviewAssetsPlugin = {
+  name: 'copy-webview-assets',
+  setup(build) {
+    build.onEnd(() => {
+      // Create dist/webview directory if it doesn't exist
+      const distWebviewPath = path.join(__dirname, 'dist', 'webview');
+      if (!fs.existsSync(distWebviewPath)) {
+        fs.mkdirSync(distWebviewPath, { recursive: true });
+      }
+
+      // Copy webview files
+      const srcWebviewPath = path.join(__dirname, 'src', 'webview');
+      const filesToCopy = ['index.html', 'styles.css', 'script.js'];
+
+      filesToCopy.forEach((file) => {
+        const srcFile = path.join(srcWebviewPath, file);
+        const destFile = path.join(distWebviewPath, file);
+        if (fs.existsSync(srcFile)) {
+          fs.copyFileSync(srcFile, destFile);
+          console.log(`Copied ${file} to dist/webview/`);
+        }
+      });
+    });
+  },
+};
 
 /**
  * @type {import('esbuild').Plugin}
@@ -36,6 +67,7 @@ async function main() {
     external: ['vscode'],
     logLevel: 'silent',
     plugins: [
+      copyWebviewAssetsPlugin,
       /* add to the end of plugins array */
       esbuildProblemMatcherPlugin,
     ],

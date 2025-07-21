@@ -197,7 +197,7 @@ export class HttpClientWebviewProvider {
       column || vscode.ViewColumn.One,
       {
         enableScripts: true,
-        localResourceRoots: [extensionUri, vscode.Uri.joinPath(extensionUri, 'src', 'webview')],
+        localResourceRoots: [extensionUri, vscode.Uri.joinPath(extensionUri, 'dist', 'webview')],
       }
     );
 
