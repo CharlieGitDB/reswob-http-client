@@ -79,7 +79,6 @@ function validateJSON(editor) {
 // Load saved requests on startup
 window.addEventListener('load', () => {
   initializeCodeMirror();
-  loadSavedRequests();
   initializeVimMode();
 });
 
@@ -163,15 +162,11 @@ function handleVimKeydown(e) {
       break;
     case 'h':
       e.preventDefault();
-      if (currentSection === 'saved') {
-        switchToFormSection();
-      }
+      // Navigation only within form now
       break;
     case 'l':
       e.preventDefault();
-      if (currentSection === 'form') {
-        switchToSavedSection();
-      }
+      // Navigation only within form now
       break;
     case 'i':
       e.preventDefault();
@@ -201,13 +196,11 @@ function handleVimKeydown(e) {
       break;
     case 'r':
       e.preventDefault();
-      loadSavedRequests();
+      // No saved requests to refresh
       break;
     case 'd':
       e.preventDefault();
-      if (currentSection === 'saved') {
-        deleteSelectedSavedRequest();
-      }
+      // No saved requests to delete
       break;
   }
 }
@@ -216,12 +209,6 @@ function moveDown() {
   if (currentSection === 'form') {
     currentFocusIndex = Math.min(currentFocusIndex + 1, focusableElements.length - 1);
     focusElement(currentFocusIndex);
-  } else if (currentSection === 'saved') {
-    const savedItems = document.querySelectorAll('.saved-request-item');
-    if (savedItems.length > 0) {
-      savedRequestIndex = Math.min(savedRequestIndex + 1, savedItems.length - 1);
-      focusSavedRequest(savedRequestIndex);
-    }
   }
 }
 
@@ -229,28 +216,26 @@ function moveUp() {
   if (currentSection === 'form') {
     currentFocusIndex = Math.max(currentFocusIndex - 1, 0);
     focusElement(currentFocusIndex);
-  } else if (currentSection === 'saved') {
-    savedRequestIndex = Math.max(savedRequestIndex - 1, 0);
-    focusSavedRequest(savedRequestIndex);
   }
 }
 
 function switchToFormSection() {
   currentSection = 'form';
-  clearSavedRequestFocus();
   focusElement(currentFocusIndex);
-}
-
-function switchToSavedSection() {
-  currentSection = 'saved';
-  clearFormFocus();
-  focusSavedRequest(savedRequestIndex);
 }
 
 function clearFormFocus() {
   document.querySelectorAll('.vim-mode-active').forEach((el) => {
     el.classList.remove('vim-mode-active');
   });
+}
+
+// Commented out saved request functions - no longer needed
+/* 
+function switchToSavedSection() {
+  currentSection = 'saved';
+  clearFormFocus();
+  focusSavedRequest(savedRequestIndex);
 }
 
 function clearSavedRequestFocus() {
@@ -298,6 +283,7 @@ function deleteSelectedSavedRequest() {
     deleteRequest(requestName);
   }
 }
+*/
 
 function focusElement(index) {
   // Remove previous focus indicators
@@ -417,17 +403,18 @@ function saveRequest() {
   }
 }
 
+function importRequests() {
+  vscode.postMessage({
+    type: 'importRequests',
+  });
+}
+
+// Commented out - saved requests are now managed in the tree view
+/*
 function loadSavedRequests() {
   vscode.postMessage({
     type: 'loadSavedRequests',
   });
-}
-
-function loadRequest(request) {
-  document.getElementById('method').value = request.method;
-  document.getElementById('url').value = request.url;
-  headersEditor.setValue(JSON.stringify(request.headers, null, 2));
-  bodyEditor.setValue(request.body || '');
 }
 
 function deleteRequest(name) {
@@ -466,6 +453,14 @@ function loadRequestFromList(name) {
     data: { name },
   });
 }
+*/
+
+function loadRequest(request) {
+  document.getElementById('method').value = request.method;
+  document.getElementById('url').value = request.url;
+  headersEditor.setValue(JSON.stringify(request.headers, null, 2));
+  bodyEditor.setValue(request.body || '');
+}
 
 window.addEventListener('message', (event) => {
   const message = event.data;
@@ -473,14 +468,17 @@ window.addEventListener('message', (event) => {
     case 'response':
       displayResponse(message.data);
       break;
-    case 'savedRequests':
-      displaySavedRequests(message.data);
-      break;
     case 'loadRequest':
       loadRequest(message.data);
       break;
     case 'requestSaved':
-      loadSavedRequests(); // Refresh the saved requests list
+      // Request saved successfully - no need to refresh saved list
+      break;
+    case 'importSuccess':
+      alert('Requests imported successfully!');
+      break;
+    case 'importError':
+      alert('Failed to import requests: ' + message.error);
       break;
   }
 });
@@ -563,10 +561,13 @@ function displayResponse(response) {
     matchBrackets: ['application/json', 'application/xml', 'text/html'].includes(contentMode),
     indentUnit: 2,
     tabSize: 2,
+    scrollbarStyle: 'native',
+    viewportMargin: Infinity,
   });
 
-  // Make sure the editor refreshes properly
+  // Make sure the editor refreshes properly and handles scrolling
   setTimeout(() => {
     responseEditor.refresh();
+    responseEditor.setSize(null, 'auto');
   }, 100);
 }

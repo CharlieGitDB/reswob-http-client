@@ -18,8 +18,8 @@ suite('WebviewContent Test Suite', () => {
     tempDir = fs.mkdtempSync(path.join(__dirname, 'test-webview-'));
     extensionUri = vscode.Uri.file(tempDir);
 
-    // Create test webview files
-    const webviewDir = path.join(tempDir, 'src', 'webview');
+    // Create test webview files in dist directory
+    const webviewDir = path.join(tempDir, 'dist', 'webview');
     fs.mkdirSync(webviewDir, { recursive: true });
 
     // Create test HTML file

@@ -53,6 +53,29 @@
       "label": "tasks: watch-tests",
       "dependsOn": ["npm: watch", "npm: watch-tests"],
       "problemMatcher": []
+    },
+    {
+      "type": "npm",
+      "script": "compile",
+      "group": "build",
+      "label": "npm: compile",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "setup-test-workspace",
+      "dependsOn": "npm: compile",
+      "type": "shell",
+      "command": "node",
+      "args": ["scripts/setup-test-workspace.js"],
+      "group": "build",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
     }
   ]
 }

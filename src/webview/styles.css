@@ -160,20 +160,32 @@ input:checked + .toggle-slider:before {
 .main-content {
   display: flex;
   gap: 20px;
+  height: calc(100vh - 200px); /* Fixed height to enable independent scrolling */
+}
+
+.left-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto; /* Enable scrolling if content overflows */
+}
+
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Prevent outer container from scrolling */
 }
 
 .request-form {
-  flex: 2;
+  flex: 1;
+  padding: 15px;
 }
 
-.saved-requests {
-  flex: 1;
-  background-color: var(--vscode-sideBar-background);
-  border: 1px solid var(--vscode-input-border);
-  border-radius: 3px;
-  padding: 15px;
-  max-height: 600px;
-  overflow-y: auto;
+.request-form .button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .form-group {
@@ -331,20 +343,24 @@ button:hover {
 }
 
 .response {
-  margin-top: 20px;
   border: 1px solid var(--vscode-input-border);
   border-radius: 3px;
-  max-height: 400px;
-  overflow: hidden;
+  height: 100%;
+  overflow: auto;
+  min-height: 0; /* Allow it to shrink */
 }
 
 .response .CodeMirror {
-  height: auto;
-  max-height: 400px;
+  height: 100% !important;
   background-color: var(--vscode-editor-background) !important;
   color: var(--vscode-input-foreground) !important;
   border: none;
   border-radius: 3px;
+}
+
+.response .CodeMirror-scroll {
+  height: 100% !important;
+  overflow-y: auto !important;
 }
 
 .response .CodeMirror-gutters {
@@ -356,6 +372,7 @@ button:hover {
   color: var(--vscode-editorLineNumber-foreground) !important;
 }
 
+/*
 .saved-request-item {
   padding: 8px;
   margin-bottom: 5px;
@@ -397,4 +414,22 @@ button:hover {
 .delete-button:hover {
   background-color: var(--vscode-errorForeground);
   opacity: 0.8;
+}
+*/
+
+/* Responsive layout for smaller screens */
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+    gap: 15px;
+    height: auto;
+  }
+
+  .right-panel {
+    min-height: 300px;
+  }
+
+  .response {
+    min-height: 300px;
+  }
 }

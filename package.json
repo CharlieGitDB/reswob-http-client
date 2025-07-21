@@ -44,6 +44,29 @@
       {
         "command": "reswob-http-client.importRequests",
         "title": "Import Requests"
+      },
+      {
+        "command": "reswob-http-client.deleteRequest",
+        "title": "Delete Request",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "reswob-http-client.deleteCollection",
+        "title": "Delete Collection",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "reswob-http-client.createCollection",
+        "title": "Create Collection",
+        "icon": "$(folder-opened)"
+      },
+      {
+        "command": "reswob-http-client.addToCollection",
+        "title": "Add to Collection"
+      },
+      {
+        "command": "reswob-http-client.removeFromCollection",
+        "title": "Remove from Collection"
       }
     ],
     "viewsContainers": {
@@ -61,15 +84,43 @@
           "id": "reswobHttpClientView",
           "name": "HTTP Client",
           "when": "true",
-          "icon": "$(globe)"
+          "icon": "$(globe)",
+          "canSelectMany": false,
+          "canMoveToNewContainer": false,
+          "canRefresh": true
         }
       ]
     },
     "menus": {
+      "view/title": [
+        {
+          "command": "reswob-http-client.createCollection",
+          "when": "view == reswobHttpClientView",
+          "group": "navigation"
+        }
+      ],
       "view/item/context": [
         {
           "command": "reswob-http-client.loadRequest",
           "when": "view == reswobHttpClientView && viewItem == saved-request"
+        },
+        {
+          "command": "reswob-http-client.deleteRequest",
+          "when": "view == reswobHttpClientView && viewItem == saved-request",
+          "group": "inline"
+        },
+        {
+          "command": "reswob-http-client.addToCollection",
+          "when": "view == reswobHttpClientView && viewItem == saved-request"
+        },
+        {
+          "command": "reswob-http-client.removeFromCollection",
+          "when": "view == reswobHttpClientView && viewItem == saved-request"
+        },
+        {
+          "command": "reswob-http-client.deleteCollection",
+          "when": "view == reswobHttpClientView && viewItem == collection",
+          "group": "inline"
         }
       ],
       "commandPalette": [
@@ -80,6 +131,26 @@
         {
           "command": "reswob-http-client.importRequests",
           "when": "true"
+        },
+        {
+          "command": "reswob-http-client.deleteRequest",
+          "when": "false"
+        },
+        {
+          "command": "reswob-http-client.deleteCollection",
+          "when": "false"
+        },
+        {
+          "command": "reswob-http-client.createCollection",
+          "when": "false"
+        },
+        {
+          "command": "reswob-http-client.addToCollection",
+          "when": "false"
+        },
+        {
+          "command": "reswob-http-client.removeFromCollection",
+          "when": "false"
         }
       ]
     }

@@ -15,11 +15,27 @@ export interface HttpRequest {
   headers: Record<string, string>;
   body?: string;
   timestamp: string;
+  collection?: string;
 }
 
 export interface RequestCollection {
   version: string;
   requests: HttpRequest[];
+  collections: CollectionFolder[];
+}
+
+export interface CollectionFolder {
+  name: string;
+  requests: string[];
+  color?: string;
+}
+
+export interface TreeItem {
+  type: 'new-request' | 'collection' | 'request';
+  id: string;
+  name: string;
+  method?: string;
+  collection?: string;
 }
 
 export class RequestManager {
@@ -51,7 +67,14 @@ export class RequestManager {
       const collectionPath = await this.getCollectionPath();
       if (fs.existsSync(collectionPath)) {
         const content = fs.readFileSync(collectionPath, 'utf-8');
-        return JSON.parse(content);
+        const parsed = JSON.parse(content);
+
+        // Ensure backward compatibility with existing files
+        if (!parsed.collections) {
+          parsed.collections = [];
+        }
+
+        return parsed;
       }
     } catch (error) {
       console.error('Error loading collection:', error);
@@ -60,6 +83,7 @@ export class RequestManager {
     return {
       version: '1.0.0',
       requests: [],
+      collections: [],
     };
   }
 
@@ -82,12 +106,6 @@ export class RequestManager {
     // Add new request
     collection.requests.push(request);
 
-    await this.saveCollection(collection);
-  }
-
-  static async deleteRequest(name: string): Promise<void> {
-    const collection = await this.loadCollection();
-    collection.requests = collection.requests.filter((r) => r.name !== name);
     await this.saveCollection(collection);
   }
 
@@ -117,53 +135,325 @@ export class RequestManager {
     const newRequests = importedCollection.requests.filter((r) => !existingNames.has(r.name));
 
     currentCollection.requests.push(...newRequests);
+
+    // Merge collections, avoiding duplicates by name
+    if (importedCollection.collections) {
+      const existingCollectionNames = new Set(currentCollection.collections.map((c) => c.name));
+      const newCollections = importedCollection.collections.filter(
+        (c) => !existingCollectionNames.has(c.name)
+      );
+      currentCollection.collections.push(...newCollections);
+    }
+
     await this.saveCollection(currentCollection);
+  }
+
+  static async createCollection(name: string): Promise<void> {
+    const collection = await this.loadCollection();
+
+    // Check if collection already exists
+    const existingCollection = collection.collections.find((c) => c.name === name);
+    if (existingCollection) {
+      throw new Error(`Collection '${name}' already exists`);
+    }
+
+    collection.collections.push({
+      name,
+      requests: [],
+    });
+
+    await this.saveCollection(collection);
+  }
+
+  static async deleteCollection(name: string): Promise<void> {
+    const collection = await this.loadCollection();
+
+    // Remove the collection
+    collection.collections = collection.collections.filter((c) => c.name !== name);
+
+    // Remove collection reference from requests
+    collection.requests.forEach((request) => {
+      if (request.collection === name) {
+        delete request.collection;
+      }
+    });
+
+    await this.saveCollection(collection);
+  }
+
+  static async deleteRequest(name: string, collectionName?: string): Promise<void> {
+    const collection = await this.loadCollection();
+
+    // Remove the request
+    collection.requests = collection.requests.filter((r) => r.name !== name);
+
+    await this.saveCollection(collection);
+  }
+
+  static async addRequestToCollection(requestName: string, collectionName: string): Promise<void> {
+    const collection = await this.loadCollection();
+
+    // Find the request
+    const request = collection.requests.find((r) => r.name === requestName);
+    if (!request) {
+      throw new Error(`Request '${requestName}' not found`);
+    }
+
+    // Find the collection
+    const targetCollection = collection.collections.find((c) => c.name === collectionName);
+    if (!targetCollection) {
+      throw new Error(`Collection '${collectionName}' not found`);
+    }
+
+    // Update request collection
+    request.collection = collectionName;
+
+    // Add to collection if not already there
+    if (!targetCollection.requests.includes(requestName)) {
+      targetCollection.requests.push(requestName);
+    }
+
+    await this.saveCollection(collection);
+  }
+
+  static async removeRequestFromCollection(requestName: string): Promise<void> {
+    const collection = await this.loadCollection();
+
+    // Find the request
+    const request = collection.requests.find((r) => r.name === requestName);
+    if (!request) {
+      throw new Error(`Request '${requestName}' not found`);
+    }
+
+    const oldCollection = request.collection;
+
+    // Remove collection reference from request
+    delete request.collection;
+
+    // Remove from collection's request list
+    if (oldCollection) {
+      const targetCollection = collection.collections.find((c) => c.name === oldCollection);
+      if (targetCollection) {
+        targetCollection.requests = targetCollection.requests.filter((r) => r !== requestName);
+      }
+    }
+
+    await this.saveCollection(collection);
   }
 }
 
-export class ReswobHttpClientViewProvider implements vscode.TreeDataProvider<string> {
-  private _onDidChangeTreeData: vscode.EventEmitter<string | undefined | null | void> =
-    new vscode.EventEmitter<string | undefined | null | void>();
-  readonly onDidChangeTreeData: vscode.Event<string | undefined | null | void> =
+export class ReswobHttpClientViewProvider
+  implements vscode.TreeDataProvider<TreeItem>, vscode.TreeDragAndDropController<TreeItem>
+{
+  private _onDidChangeTreeData: vscode.EventEmitter<TreeItem | undefined | null | void> =
+    new vscode.EventEmitter<TreeItem | undefined | null | void>();
+  readonly onDidChangeTreeData: vscode.Event<TreeItem | undefined | null | void> =
     this._onDidChangeTreeData.event;
+
+  // Drag and drop support
+  dropMimeTypes = ['application/vnd.code.tree.reswobHttpClientView'];
+  dragMimeTypes = ['application/vnd.code.tree.reswobHttpClientView'];
 
   refresh(): void {
     this._onDidChangeTreeData.fire();
   }
 
-  getTreeItem(element: string): vscode.TreeItem {
-    if (element === 'new-request') {
-      const item = new vscode.TreeItem('New Request', vscode.TreeItemCollapsibleState.None);
-      item.command = {
-        command: 'reswob-http-client.openHttpClient',
-        title: 'Open HTTP Client',
-        arguments: [],
-      };
-      item.iconPath = new vscode.ThemeIcon('add');
-      return item;
+  getTreeItem(element: TreeItem): vscode.TreeItem {
+    switch (element.type) {
+      case 'new-request': {
+        const item = new vscode.TreeItem('New Request', vscode.TreeItemCollapsibleState.None);
+        item.command = {
+          command: 'reswob-http-client.openHttpClient',
+          title: 'Open HTTP Client',
+          arguments: [],
+        };
+        item.iconPath = new vscode.ThemeIcon('add');
+        item.contextValue = 'new-request';
+        return item;
+      }
+      case 'collection': {
+        const item = new vscode.TreeItem(element.name, vscode.TreeItemCollapsibleState.Expanded);
+        item.iconPath = new vscode.ThemeIcon('folder');
+        item.contextValue = 'collection';
+        item.tooltip = `Collection: ${element.name}`;
+        return item;
+      }
+      case 'request': {
+        const method = element.method || 'GET';
+        const methodBadge = this.getMethodBadge(method);
+        const item = new vscode.TreeItem(
+          `${methodBadge} ${element.name}`,
+          vscode.TreeItemCollapsibleState.None
+        );
+        item.command = {
+          command: 'reswob-http-client.loadRequest',
+          title: 'Load Request',
+          arguments: [element.name],
+        };
+        item.iconPath = new vscode.ThemeIcon('file');
+        item.contextValue = 'saved-request';
+        item.tooltip = `${method} Request: ${element.name}`;
+        return item;
+      }
+      default:
+        throw new Error(`Unknown tree item type: ${element.type}`);
     }
-
-    const item = new vscode.TreeItem(element, vscode.TreeItemCollapsibleState.None);
-    item.command = {
-      command: 'reswob-http-client.loadRequest',
-      title: 'Load Request',
-      arguments: [element],
-    };
-    item.iconPath = new vscode.ThemeIcon('file');
-    item.contextValue = 'saved-request';
-    return item;
   }
 
-  async getChildren(element?: string): Promise<string[]> {
-    if (!element) {
-      try {
-        const requestNames = await RequestManager.getRequestNames();
-        return ['new-request', ...requestNames];
-      } catch (error) {
-        return ['new-request'];
+  private getMethodBadge(method: string): string {
+    switch (method.toUpperCase()) {
+      case 'GET':
+        return '🟢';
+      case 'POST':
+        return '🟡';
+      case 'PUT':
+        return '🟠';
+      case 'DELETE':
+        return '🔴';
+      case 'PATCH':
+        return '🟣';
+      case 'HEAD':
+        return '🔵';
+      case 'OPTIONS':
+        return '⚪';
+      default:
+        return '⚫';
+    }
+  }
+
+  async getChildren(element?: TreeItem): Promise<TreeItem[]> {
+    try {
+      const collection = await RequestManager.loadCollection();
+
+      if (!element) {
+        // Root level - show new request, collections, and uncategorized requests
+        const items: TreeItem[] = [];
+
+        // Always show "New Request" first
+        items.push({ type: 'new-request', id: 'new-request', name: 'New Request' });
+
+        // Show collections
+        for (const col of collection.collections) {
+          items.push({
+            type: 'collection',
+            id: `collection:${col.name}`,
+            name: col.name,
+          });
+        }
+
+        // Show uncategorized requests
+        const uncategorizedRequests = collection.requests.filter((req) => !req.collection);
+        for (const request of uncategorizedRequests) {
+          items.push({
+            type: 'request',
+            id: `request:${request.name}`,
+            name: request.name,
+            method: request.method,
+          });
+        }
+
+        return items;
+      } else if (element.type === 'collection') {
+        // Show requests in this collection
+        const collectionName = element.name;
+        const collectionFolder = collection.collections.find((c) => c.name === collectionName);
+
+        if (!collectionFolder) {
+          return [];
+        }
+
+        const items: TreeItem[] = [];
+        for (const requestName of collectionFolder.requests) {
+          const request = collection.requests.find((r) => r.name === requestName);
+          if (request) {
+            items.push({
+              type: 'request',
+              id: `request:${request.name}`,
+              name: request.name,
+              method: request.method,
+              collection: collectionName,
+            });
+          }
+        }
+
+        return items;
+      }
+
+      return [];
+    } catch (error) {
+      console.error('Error getting tree children:', error);
+      return [{ type: 'new-request', id: 'new-request', name: 'New Request' }];
+    }
+  }
+
+  // Drag and Drop implementation
+  async handleDrag(source: TreeItem[], treeDataTransfer: vscode.DataTransfer): Promise<void> {
+    treeDataTransfer.set(
+      'application/vnd.code.tree.reswobHttpClientView',
+      new vscode.DataTransferItem(source)
+    );
+  }
+
+  async handleDrop(target: TreeItem | undefined, dataTransfer: vscode.DataTransfer): Promise<void> {
+    const transferItem = dataTransfer.get('application/vnd.code.tree.reswobHttpClientView');
+    if (!transferItem) {
+      return;
+    }
+
+    const draggedItems = transferItem.value as TreeItem[];
+
+    for (const item of draggedItems) {
+      if (item.type === 'request') {
+        try {
+          if (target?.type === 'collection') {
+            // Move request to collection
+            await RequestManager.addRequestToCollection(item.name, target.name);
+          } else if (!target || target.type === 'new-request') {
+            // Move request to root (uncategorized)
+            await RequestManager.removeRequestFromCollection(item.name);
+          }
+        } catch (error) {
+          vscode.window.showErrorMessage(`Failed to move request: ${error}`);
+        }
       }
     }
-    return [];
+
+    this.refresh();
+  }
+
+  // Delete functionality
+  async deleteItem(element: TreeItem): Promise<void> {
+    try {
+      if (element.type === 'request') {
+        const result = await vscode.window.showWarningMessage(
+          `Are you sure you want to delete the request "${element.name}"?`,
+          'Delete',
+          'Cancel'
+        );
+
+        if (result === 'Delete') {
+          await RequestManager.deleteRequest(element.name);
+          this.refresh();
+          vscode.window.showInformationMessage(`Request "${element.name}" deleted successfully!`);
+        }
+      } else if (element.type === 'collection') {
+        const result = await vscode.window.showWarningMessage(
+          `Are you sure you want to delete the collection "${element.name}"? This will not delete the requests inside.`,
+          'Delete',
+          'Cancel'
+        );
+
+        if (result === 'Delete') {
+          await RequestManager.deleteCollection(element.name);
+          this.refresh();
+          vscode.window.showInformationMessage(
+            `Collection "${element.name}" deleted successfully!`
+          );
+        }
+      }
+    } catch (error) {
+      vscode.window.showErrorMessage(`Failed to delete: ${error}`);
+    }
   }
 }
 
@@ -229,6 +519,9 @@ export class HttpClientWebviewProvider {
             break;
           case 'deleteRequest':
             HttpClientWebviewProvider.deleteRequest(message.data.name, panel.webview);
+            break;
+          case 'importRequests':
+            HttpClientWebviewProvider.importRequestsFromWebview(panel.webview);
             break;
         }
       },
@@ -317,6 +610,17 @@ export class HttpClientWebviewProvider {
       });
     } catch (error) {
       vscode.window.showErrorMessage(`Failed to load saved requests: ${error}`);
+    }
+  }
+
+  public static async importRequestsFromWebview(webview: vscode.Webview) {
+    try {
+      // Use the existing import command functionality
+      await vscode.commands.executeCommand('reswob-http-client.importRequests');
+      webview.postMessage({ type: 'importSuccess', message: 'Requests imported successfully' });
+    } catch (error) {
+      console.error('Error importing requests:', error);
+      webview.postMessage({ type: 'importError', message: 'Failed to import requests' });
     }
   }
 
@@ -446,9 +750,13 @@ export function activate(context: vscode.ExtensionContext) {
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "reswob-http-client" is now active!');
 
-  // Register the tree data provider for the sidebar
+  // Register the tree data provider for the sidebar with drag and drop support
   const provider = new ReswobHttpClientViewProvider();
-  vscode.window.registerTreeDataProvider('reswobHttpClientView', provider);
+  const disposable = vscode.window.createTreeView('reswobHttpClientView', {
+    treeDataProvider: provider,
+    dragAndDropController: provider,
+    canSelectMany: false,
+  });
 
   // Set the tree provider reference for the webview
   HttpClientWebviewProvider.setTreeProvider(provider);
@@ -465,6 +773,98 @@ export function activate(context: vscode.ExtensionContext) {
     'reswob-http-client.loadRequest',
     (requestName: string) => {
       HttpClientWebviewProvider.createOrShow(context.extensionUri, requestName);
+    }
+  );
+
+  const deleteRequestCommand = vscode.commands.registerCommand(
+    'reswob-http-client.deleteRequest',
+    async (item: TreeItem) => {
+      await provider.deleteItem(item);
+    }
+  );
+
+  const deleteCollectionCommand = vscode.commands.registerCommand(
+    'reswob-http-client.deleteCollection',
+    async (item: TreeItem) => {
+      await provider.deleteItem(item);
+    }
+  );
+
+  const createCollectionCommand = vscode.commands.registerCommand(
+    'reswob-http-client.createCollection',
+    async () => {
+      const collectionName = await vscode.window.showInputBox({
+        prompt: 'Enter a name for the new collection',
+        placeHolder: 'My Collection',
+        validateInput: (value) => {
+          if (!value || value.trim().length === 0) {
+            return 'Collection name cannot be empty';
+          }
+          return null;
+        },
+      });
+
+      if (collectionName) {
+        try {
+          await RequestManager.createCollection(collectionName);
+          provider.refresh();
+          vscode.window.showInformationMessage(
+            `Collection "${collectionName}" created successfully!`
+          );
+        } catch (error) {
+          vscode.window.showErrorMessage(`Failed to create collection: ${error}`);
+        }
+      }
+    }
+  );
+
+  const addToCollectionCommand = vscode.commands.registerCommand(
+    'reswob-http-client.addToCollection',
+    async (item: TreeItem) => {
+      if (item.type !== 'request') {
+        return;
+      }
+
+      try {
+        const collection = await RequestManager.loadCollection();
+        const collectionNames = collection.collections.map((c) => c.name);
+
+        if (collectionNames.length === 0) {
+          vscode.window.showWarningMessage('No collections available. Create a collection first.');
+          return;
+        }
+
+        const selectedCollection = await vscode.window.showQuickPick(collectionNames, {
+          placeHolder: 'Select a collection to add the request to',
+        });
+
+        if (selectedCollection) {
+          await RequestManager.addRequestToCollection(item.name, selectedCollection);
+          provider.refresh();
+          vscode.window.showInformationMessage(
+            `Request "${item.name}" added to collection "${selectedCollection}"`
+          );
+        }
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to add request to collection: ${error}`);
+      }
+    }
+  );
+
+  const removeFromCollectionCommand = vscode.commands.registerCommand(
+    'reswob-http-client.removeFromCollection',
+    async (item: TreeItem) => {
+      if (item.type !== 'request') {
+        return;
+      }
+
+      try {
+        await RequestManager.removeRequestFromCollection(item.name);
+        provider.refresh();
+        vscode.window.showInformationMessage(`Request "${item.name}" removed from collection`);
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to remove request from collection: ${error}`);
+      }
     }
   );
 
@@ -516,8 +916,14 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   context.subscriptions.push(
+    disposable,
     openHttpClientCommand,
     loadRequestCommand,
+    deleteRequestCommand,
+    deleteCollectionCommand,
+    createCollectionCommand,
+    addToCollectionCommand,
+    removeFromCollectionCommand,
     exportRequestsCommand,
     importRequestsCommand,
     helloWorldCommand
