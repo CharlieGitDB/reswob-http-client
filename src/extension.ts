@@ -3,6 +3,9 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as http from 'http';
+import * as https from 'https';
+import * as url from 'url';
 import { getWebviewContent } from './webviewContent';
 
 interface HttpRequest {
@@ -345,28 +348,91 @@ class HttpClientWebviewProvider {
 
   private static async sendHttpRequest(data: any, webview: vscode.Webview) {
     try {
-      // Here you would implement the actual HTTP request logic
-      // For now, we'll just show a mock response
-      const response = {
-        status: 200,
+      const parsedUrl = new URL(data.url);
+      const isHttps = parsedUrl.protocol === 'https:';
+      const httpModule = isHttps ? https : http;
+
+      const options = {
+        hostname: parsedUrl.hostname,
+        port: parsedUrl.port || (isHttps ? 443 : 80),
+        path: parsedUrl.pathname + parsedUrl.search,
+        method: data.method || 'GET',
         headers: {
-          'content-type': 'application/json',
-        },
-        body: {
-          message: 'Mock response - implement actual HTTP client here',
-          request: data,
+          'User-Agent': 'Reswob HTTP Client (VS Code Extension)',
+          ...data.headers,
         },
       };
+
+      // Add Content-Length header if there's a body
+      if (data.body && typeof data.body === 'string') {
+        options.headers['Content-Length'] = Buffer.byteLength(data.body);
+      }
+
+      const startTime = Date.now();
+
+      const response = await new Promise<any>((resolve, reject) => {
+        const req = httpModule.request(options, (res) => {
+          let responseBody = '';
+
+          res.on('data', (chunk) => {
+            responseBody += chunk;
+          });
+
+          res.on('end', () => {
+            const endTime = Date.now();
+            const responseTime = endTime - startTime;
+
+            // Try to parse JSON response
+            let parsedBody;
+            try {
+              parsedBody = JSON.parse(responseBody);
+            } catch {
+              parsedBody = responseBody;
+            }
+
+            resolve({
+              status: res.statusCode,
+              statusText: res.statusMessage,
+              headers: res.headers,
+              body: parsedBody,
+              responseTime,
+              size: Buffer.byteLength(responseBody),
+            });
+          });
+        });
+
+        req.on('error', (error) => {
+          reject(error);
+        });
+
+        // Set timeout (30 seconds)
+        req.setTimeout(30000, () => {
+          req.destroy();
+          reject(new Error('Request timeout (30s)'));
+        });
+
+        // Write body if present
+        if (data.body && typeof data.body === 'string') {
+          req.write(data.body);
+        }
+
+        req.end();
+      });
 
       webview.postMessage({
         type: 'response',
         data: response,
       });
     } catch (error) {
+      const endTime = Date.now();
+      const responseTime = endTime - Date.now();
+
       webview.postMessage({
         type: 'response',
         data: {
           error: error instanceof Error ? error.message : 'Unknown error',
+          status: 0,
+          responseTime,
         },
       });
     }
