@@ -8,7 +8,7 @@ import * as https from 'https';
 import * as url from 'url';
 import { getWebviewContent } from './webviewContent';
 
-interface HttpRequest {
+export interface HttpRequest {
   name: string;
   method: string;
   url: string;
@@ -17,12 +17,12 @@ interface HttpRequest {
   timestamp: string;
 }
 
-interface RequestCollection {
+export interface RequestCollection {
   version: string;
   requests: HttpRequest[];
 }
 
-class RequestManager {
+export class RequestManager {
   private static readonly REQUESTS_FOLDER = '.reswob-requests';
   private static readonly COLLECTION_FILE = 'requests.json';
 
@@ -121,7 +121,7 @@ class RequestManager {
   }
 }
 
-class ReswobHttpClientViewProvider implements vscode.TreeDataProvider<string> {
+export class ReswobHttpClientViewProvider implements vscode.TreeDataProvider<string> {
   private _onDidChangeTreeData: vscode.EventEmitter<string | undefined | null | void> =
     new vscode.EventEmitter<string | undefined | null | void>();
   readonly onDidChangeTreeData: vscode.Event<string | undefined | null | void> =
@@ -167,7 +167,7 @@ class ReswobHttpClientViewProvider implements vscode.TreeDataProvider<string> {
   }
 }
 
-class HttpClientWebviewProvider {
+export class HttpClientWebviewProvider {
   private static currentPanel: vscode.WebviewPanel | undefined;
   private static treeProvider: ReswobHttpClientViewProvider;
 
