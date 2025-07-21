@@ -1,71 +1,109 @@
-# reswob-http-client README
+# Reswob HTTP Client
 
-This is the README for your extension "reswob-http-client". After writing up a brief description, we recommend including the following sections.
+A VS Code extension that provides a built-in HTTP client for testing REST APIs and web services directly within your workspace.
+
+## Overview
+
+Reswob HTTP Client is a comprehensive VS Code extension that allows developers to:
+
+- Send HTTP requests (GET, POST, PUT, DELETE, etc.) without leaving VS Code
+- Save and manage collections of HTTP requests
+- Share request collections with team members
+- Test APIs during development with an intuitive webview interface
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+### 🌐 Built-in HTTP Client
 
-For example if there is an image subfolder under your extension project workspace:
+- Clean, user-friendly interface for sending HTTP requests
+- Support for all common HTTP methods (GET, POST, PUT, DELETE, PATCH, etc.)
+- Request headers management
+- Request body support (JSON, text, form data)
+- Response viewing with syntax highlighting
 
-\!\[feature X\]\(images/feature-x.png\)
+### 💾 Request Management
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- Save HTTP requests with custom names
+- Organize requests in a sidebar tree view
+- Load saved requests for quick reuse
+- Delete unwanted requests with confirmation
+
+### 📤 Import/Export
+
+- Export request collections to JSON files
+- Import request collections from JSON files
+- Share request collections between team members
+- Version control integration with `.reswob-requests/` folder
+
+### 🎯 VS Code Integration
+
+- Activity bar icon for quick access
+- Command palette integration
+- Context menus for saved requests
+- Follows VS Code theme and styling conventions
+
+## Getting Started
+
+1. Install the extension
+2. Click the globe icon (🌐) in the Activity Bar to open the HTTP Client
+3. Use "Open HTTP Client" command or click "+ New Request" in the sidebar
+4. Fill in your request details and click "Send"
+5. Save frequently used requests with the "💾 Save Request" button
+
+## Commands
+
+- `reswob-http-client.openHttpClient` - Open the HTTP Client webview
+- `reswob-http-client.saveRequest` - Save the current request
+- `reswob-http-client.loadRequest` - Load a saved request
+- `reswob-http-client.exportRequests` - Export all requests to a JSON file
+- `reswob-http-client.importRequests` - Import requests from a JSON file
+
+## Documentation
+
+This project includes comprehensive documentation:
+
+- **[REQUEST_MANAGEMENT.md](./REQUEST_MANAGEMENT.md)** - Detailed guide on saving, loading, and managing HTTP requests, including export/import functionality
+- **[WEBVIEW_ARCHITECTURE.md](./WEBVIEW_ARCHITECTURE.md)** - Technical documentation explaining the webview architecture and file structure
+- **[TEST_SUITE_SUMMARY.md](./TEST_SUITE_SUMMARY.md)** - Overview of the comprehensive unit test suite (92 passing tests)
+- **[PRE_COMMIT_SETUP.md](./PRE_COMMIT_SETUP.md)** - Development setup guide for automated code formatting and linting
+- **[CHANGELOG.md](./CHANGELOG.md)** - Version history and release notes
+- **[vsc-extension-quickstart.md](./vsc-extension-quickstart.md)** - VS Code extension development quickstart guide
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- VS Code version 1.102.0 or higher
+- No additional dependencies required
 
-## Extension Settings
+## Development
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+This extension is built with:
 
-For example:
+- TypeScript for type safety and modern JavaScript features
+- ESBuild for fast compilation and bundling
+- ESLint + Prettier for code quality and formatting
+- Husky for pre-commit hooks
+- Comprehensive unit tests with Mocha and Sinon
 
-This extension contributes the following settings:
+### Scripts
 
-- `myExtension.enable`: Enable/disable this extension.
-- `myExtension.thing`: Set to `blah` to do something.
+- `npm run compile` - Compile and bundle the extension
+- `npm run watch` - Watch mode for development
+- `npm run test` - Run the test suite
+- `npm run lint` - Lint the codebase
+- `npm run format` - Format code with Prettier
 
-## Known Issues
+## License
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+This project is licensed under the GPL-3.0 License - see the [LICENSE](./LICENSE) file for details.
 
-## Release Notes
+## Contributing
 
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes (code will be automatically formatted on commit)
+4. Run the test suite
+5. Submit a pull request
 
 ---
 
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-- [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-- Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-- Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-- Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-- [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-- [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+**Enjoy using Reswob HTTP Client for all your API testing needs!** 🚀
