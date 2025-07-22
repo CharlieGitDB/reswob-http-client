@@ -1,24 +1,34 @@
+// @ts-nocheck
+import type {
+  CodeMirrorEditor,
+  HttpRequest,
+  HttpResponse,
+  SavedRequest,
+  WebviewMessage,
+} from './types';
+
 const vscode = acquireVsCodeApi();
 
 // CodeMirror editors
-let headersEditor, bodyEditor;
+let headersEditor: any = null;
+let bodyEditor: any = null;
 
 // Headers mode state
-let headersFormMode = false; // false = JSON mode, true = Form mode
+let headersFormMode: boolean = false; // false = JSON mode, true = Form mode
 
 // Vim mode state
-let vimMode = false;
-let vimInsertMode = false;
-let currentFocusIndex = 0;
-let currentSection = 'form'; // 'form' or 'saved'
-let currentPane = 'form'; // 'form' or 'response'
-let savedRequestIndex = 0;
-const focusableElements = ['method', 'url', 'headers', 'body'];
-const responseTabs = ['body', 'headers', 'info'];
-let currentResponseTab = 0;
+let vimMode: boolean = false;
+let vimInsertMode: boolean = false;
+let currentFocusIndex: number = 0;
+let currentSection: 'form' | 'saved' = 'form';
+let currentPane: 'form' | 'response' = 'form';
+let savedRequestIndex: number = 0;
+const focusableElements: string[] = ['method', 'url', 'headers', 'body'];
+const responseTabs: string[] = ['body', 'headers', 'info'];
+let currentResponseTab: number = 0;
 
 // Initialize CodeMirror editors
-function initializeCodeMirror() {
+function initializeCodeMirror(): void {
   // Headers editor (JSON)
   headersEditor = CodeMirror(document.getElementById('headers'), {
     mode: 'application/json',
@@ -52,21 +62,29 @@ function initializeCodeMirror() {
   });
 
   // Clear initial placeholder values
-  headersEditor.setValue('');
-  bodyEditor.setValue('');
+  if (headersEditor) {
+    headersEditor.setValue('');
+  }
+  if (bodyEditor) {
+    bodyEditor.setValue('');
+  }
 
   // Add validation feedback
-  headersEditor.on('change', function () {
-    validateJSON(headersEditor);
-  });
+  if (headersEditor) {
+    headersEditor.on('change', function () {
+      validateJSON(headersEditor);
+    });
+  }
 
-  bodyEditor.on('change', function () {
-    validateJSON(bodyEditor);
-  });
+  if (bodyEditor) {
+    bodyEditor.on('change', function () {
+      validateJSON(bodyEditor);
+    });
+  }
 }
 
 // Validate JSON and provide visual feedback
-function validateJSON(editor) {
+function validateJSON(editor: any): void {
   const value = editor.getValue().trim();
   if (value === '') {
     return;
@@ -83,12 +101,12 @@ function validateJSON(editor) {
 }
 
 // Initialize headers toggle functionality
-function initializeHeadersToggle() {
+function initializeHeadersToggle(): void {
   const toggleBtn = document.getElementById('headersModeToggle');
   const jsonMode = document.getElementById('headers-json-mode');
   const formMode = document.getElementById('headers-form-mode');
 
-  toggleBtn.addEventListener('click', () => {
+  toggleBtn?.addEventListener('click', () => {
     headersFormMode = !headersFormMode;
     updateHeadersMode();
   });
@@ -97,41 +115,55 @@ function initializeHeadersToggle() {
   updateHeadersMode();
 }
 
-function updateHeadersMode() {
+function updateHeadersMode(): void {
   const toggleBtn = document.getElementById('headersModeToggle');
   const jsonMode = document.getElementById('headers-json-mode');
   const formMode = document.getElementById('headers-form-mode');
 
   if (headersFormMode) {
     // Switch to form mode
-    jsonMode.style.display = 'none';
-    formMode.style.display = 'block';
-    toggleBtn.innerHTML = '📝 Switch to JSON';
+    if (jsonMode) {
+      jsonMode.style.display = 'none';
+    }
+    if (formMode) {
+      formMode.style.display = 'block';
+    }
+    if (toggleBtn) {
+      toggleBtn.innerHTML = '📝 Switch to JSON';
+    }
 
     // Convert JSON to form if headers exist
     syncJsonToForm();
   } else {
     // Switch to JSON mode
-    jsonMode.style.display = 'block';
-    formMode.style.display = 'none';
-    toggleBtn.innerHTML = '📝 Switch to Form';
+    if (jsonMode) {
+      jsonMode.style.display = 'block';
+    }
+    if (formMode) {
+      formMode.style.display = 'none';
+    }
+    if (toggleBtn) {
+      toggleBtn.innerHTML = '📝 Switch to Form';
+    }
 
     // Convert form to JSON
     syncFormToJson();
   }
 }
 
-function syncJsonToForm() {
-  const headersList = document.getElementById('headersList');
+function syncJsonToForm(): void {
+  const headersList = document.getElementById('headersList') as HTMLElement;
   headersList.innerHTML = '';
 
   try {
-    const jsonValue = headersEditor.getValue().trim();
-    if (jsonValue) {
-      const headers = JSON.parse(jsonValue);
-      Object.entries(headers).forEach(([key, value]) => {
-        addHeaderRow(key, value);
-      });
+    if (headersEditor) {
+      const jsonValue = headersEditor.getValue().trim();
+      if (jsonValue) {
+        const headers = JSON.parse(jsonValue) as Record<string, string>;
+        Object.entries(headers).forEach(([key, value]: [string, any]) => {
+          addHeaderRow(key, value);
+        });
+      }
     }
   } catch (e) {
     // If JSON is invalid, show empty form
@@ -143,26 +175,28 @@ function syncJsonToForm() {
   }
 }
 
-function syncFormToJson() {
-  const headers = {};
+function syncFormToJson(): void {
+  const headers: Record<string, string> = {};
   const headerRows = document.querySelectorAll('.header-row');
 
-  headerRows.forEach((row) => {
-    const keyInput = row.querySelector('.header-key');
-    const valueInput = row.querySelector('.header-value');
-    const key = keyInput.value.trim();
-    const value = valueInput.value.trim();
+  headerRows.forEach((row: any) => {
+    const keyInput = row.querySelector('.header-key') as HTMLInputElement;
+    const valueInput = row.querySelector('.header-value') as HTMLInputElement;
+    const key = keyInput?.value.trim() || '';
+    const value = valueInput?.value.trim() || '';
 
     if (key && value) {
       headers[key] = value;
     }
   });
 
-  headersEditor.setValue(Object.keys(headers).length > 0 ? JSON.stringify(headers, null, 2) : '');
+  if (headersEditor) {
+    headersEditor.setValue(Object.keys(headers).length > 0 ? JSON.stringify(headers, null, 2) : '');
+  }
 }
 
-function addHeaderRow(key = '', value = '') {
-  const headersList = document.getElementById('headersList');
+function addHeaderRow(key: string = '', value: string = ''): void {
+  const headersList = document.getElementById('headersList') as HTMLElement;
   const row = document.createElement('div');
   row.className = 'header-row';
 
@@ -175,27 +209,30 @@ function addHeaderRow(key = '', value = '') {
   headersList.appendChild(row);
 
   // Add event listeners to sync back to JSON when form changes
-  const keyInput = row.querySelector('.header-key');
-  const valueInput = row.querySelector('.header-value');
+  const keyInput = row.querySelector('.header-key') as HTMLInputElement;
+  const valueInput = row.querySelector('.header-value') as HTMLInputElement;
 
-  keyInput.addEventListener('input', () => {
+  keyInput?.addEventListener('input', () => {
     if (!headersFormMode) {
       syncFormToJson();
     }
   });
-  valueInput.addEventListener('input', () => {
+  valueInput?.addEventListener('input', () => {
     if (!headersFormMode) {
       syncFormToJson();
     }
   });
 }
 
-function removeHeaderRow(btn) {
-  btn.parentElement.remove();
+function removeHeaderRow(btn: any): void {
+  btn.parentElement?.remove();
   if (headersFormMode) {
     syncFormToJson();
   }
 }
+
+// Make function available globally for HTML onclick handlers
+(window as any).removeHeaderRow = removeHeaderRow;
 
 // Initialize add header button and other DOM elements
 function initializeDOMElements() {
@@ -209,7 +246,7 @@ function initializeDOMElements() {
 function initializeResponseTabs() {
   const tabBtns = document.querySelectorAll('.tab-btn');
 
-  tabBtns.forEach((btn) => {
+  tabBtns.forEach((btn: any) => {
     btn.addEventListener('click', () => {
       const tabName = btn.getAttribute('data-tab');
       switchResponseTab(tabName);
@@ -217,31 +254,41 @@ function initializeResponseTabs() {
   });
 }
 
-function switchResponseTab(tabName) {
+function switchResponseTab(tabName: string | null) {
+  if (!tabName) {
+    return;
+  }
+
   // Update tab buttons
   document.querySelectorAll('.tab-btn').forEach((btn) => {
     btn.classList.remove('active');
   });
-  document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+  const targetBtn = document.querySelector(`[data-tab="${tabName}"]`);
+  if (targetBtn) {
+    targetBtn.classList.add('active');
+  }
 
   // Update tab panels
   document.querySelectorAll('.tab-panel').forEach((panel) => {
     panel.classList.remove('active');
   });
-  document.getElementById(`tab-${tabName}`).classList.add('active');
+  const targetPanel = document.getElementById(`tab-${tabName}`);
+  if (targetPanel) {
+    targetPanel.classList.add('active');
+  }
 
   // Refresh CodeMirror editors when switching to body tab
   if (tabName === 'body') {
     setTimeout(() => {
       const bodyContent = document.getElementById('response-body-content');
-      const codeMirrorEditor = bodyContent.querySelector('.CodeMirror');
-      if (codeMirrorEditor && codeMirrorEditor.CodeMirror) {
-        codeMirrorEditor.CodeMirror.refresh();
+      const codeMirrorEditor = bodyContent?.querySelector('.CodeMirror');
+      if (codeMirrorEditor && (codeMirrorEditor as any).CodeMirror) {
+        (codeMirrorEditor as any).CodeMirror.refresh();
         // Ensure proper size after tab switch
-        codeMirrorEditor.CodeMirror.setSize(null, '100%');
+        (codeMirrorEditor as any).CodeMirror.setSize(null, '100%');
         // Additional refresh for proper rendering
         setTimeout(() => {
-          codeMirrorEditor.CodeMirror.refresh();
+          (codeMirrorEditor as any).CodeMirror.refresh();
         }, 100);
       }
     }, 50);
@@ -258,31 +305,53 @@ window.addEventListener('load', () => {
 });
 
 function initializeVimMode() {
-  const vimToggle = document.getElementById('vimModeToggle');
+  const vimToggle = document.getElementById('vimModeToggle') as HTMLInputElement;
   const vimHelp = document.getElementById('vimHelp');
   const toggleLabel = document.querySelector('.toggle-label');
 
+  if (!vimToggle) {
+    return;
+  }
+
+  // Ensure vim mode starts disabled
+  vimMode = false;
+  vimToggle.checked = false;
+  document.body.classList.remove('vim-mode-enabled', 'vim-mode-normal', 'vim-mode-insert');
+
+  // Hide vim help initially
+  if (vimHelp) {
+    vimHelp.style.display = 'none';
+  }
+
   // Create scroll indicator
-  createScrollIndicator();
+  const indicator = createScrollIndicator();
+  indicator.style.display = 'none'; // Hide initially when vim mode is disabled
 
   // Toggle vim mode
   vimToggle.addEventListener('change', (e) => {
-    vimMode = e.target.checked;
+    vimMode = (e.target as HTMLInputElement).checked;
     updateVimModeIndicator();
 
     // Update toggle label color
     if (vimMode) {
-      toggleLabel.classList.add('vim-enabled');
+      toggleLabel?.classList.add('vim-enabled');
+      document.body.classList.add('vim-mode-enabled');
       currentPane = 'form';
       currentSection = 'form';
       focusElement(0);
       document.body.classList.add('vim-mode-normal');
     } else {
-      toggleLabel.classList.remove('vim-enabled');
+      toggleLabel?.classList.remove('vim-enabled');
+      document.body.classList.remove('vim-mode-enabled');
       clearFormFocus();
       clearResponsePaneFocus();
       document.body.classList.remove('vim-mode-normal', 'vim-mode-insert');
       updateResponseScrollIndicator();
+      // Hide vim help when disabling vim mode
+      const vimHelp = document.getElementById('vimHelp');
+      if (vimHelp) {
+        vimHelp.style.display = 'none';
+      }
     }
   });
 
@@ -305,13 +374,15 @@ function updateVimModeIndicator() {
   }
 }
 
-function handleGlobalKeydown(e) {
+function handleGlobalKeydown(e: KeyboardEvent) {
   // Ctrl/Cmd + Space to toggle vim mode
   if ((e.ctrlKey || e.metaKey) && e.key === ' ') {
     e.preventDefault();
-    const vimToggle = document.getElementById('vimModeToggle');
-    vimToggle.checked = !vimToggle.checked;
-    vimToggle.dispatchEvent(new Event('change'));
+    const vimToggle = document.getElementById('vimModeToggle') as HTMLInputElement;
+    if (vimToggle) {
+      vimToggle.checked = !vimToggle.checked;
+      vimToggle.dispatchEvent(new Event('change'));
+    }
     return;
   }
 
@@ -341,7 +412,7 @@ function handleGlobalKeydown(e) {
   }
 }
 
-function handleVimKeydown(e) {
+function handleVimKeydown(e: KeyboardEvent) {
   if (!vimMode) {
     return;
   }
@@ -359,7 +430,7 @@ function handleVimKeydown(e) {
     if (vimInsertMode) {
       vimInsertMode = false;
       updateVimModeIndicator();
-      document.activeElement.blur();
+      (document.activeElement as HTMLElement)?.blur();
       focusElement(currentFocusIndex);
     } else if (currentPane === 'response') {
       // Exit content scrolling mode if in it
@@ -507,7 +578,7 @@ function handleVimKeydown(e) {
         if (activeTabContent && !activeTabContent.classList.contains('vim-mode-active')) {
           clearResponsePaneFocus();
           activeTabContent.classList.add('vim-mode-active');
-          activeTabContent.focus();
+          (activeTabContent as HTMLElement).focus();
           // Update visual indicator
           updateResponseScrollIndicator();
         } else if (activeTabContent && activeTabContent.classList.contains('vim-mode-active')) {
@@ -532,7 +603,7 @@ function handleVimKeydown(e) {
           switchResponseTab(responseTabs[currentResponseTab]);
         }
       } else if (document.activeElement.tagName === 'BUTTON') {
-        document.activeElement.click();
+        (document.activeElement as HTMLElement).click();
       } else {
         enterInsertMode();
       }
@@ -609,7 +680,19 @@ function switchToResponsePane() {
   }
 }
 
-function getScrollableElement() {
+// Type definition for scrollable elements
+type ScrollableElement =
+  | {
+      type: 'codemirror';
+      element: Element;
+      editor: any;
+    }
+  | {
+      type: 'regular';
+      element: Element;
+    };
+
+function getScrollableElement(): ScrollableElement | null {
   const activeTabContent = document.querySelector('.tab-panel.active .tab-panel-content');
   if (!activeTabContent || !activeTabContent.classList.contains('vim-mode-active')) {
     return null;
@@ -619,11 +702,11 @@ function getScrollableElement() {
   const bodyTab = document.getElementById('tab-body');
   if (bodyTab && bodyTab.classList.contains('active')) {
     const codeMirrorElement = bodyTab.querySelector('.CodeMirror');
-    if (codeMirrorElement && codeMirrorElement.CodeMirror) {
+    if (codeMirrorElement && (codeMirrorElement as any).CodeMirror) {
       return {
         type: 'codemirror',
         element: codeMirrorElement,
-        editor: codeMirrorElement.CodeMirror,
+        editor: (codeMirrorElement as any).CodeMirror,
       };
     }
   }
@@ -634,58 +717,61 @@ function getScrollableElement() {
   };
 }
 
-function scrollDown(scrollable, amount = 50) {
+function scrollDown(scrollable: ScrollableElement, amount = 50) {
   if (scrollable.type === 'codemirror') {
     const scrollInfo = scrollable.editor.getScrollInfo();
     scrollable.editor.scrollTo(null, scrollInfo.top + amount);
   } else {
-    scrollable.element.scrollTop += amount;
+    (scrollable.element as HTMLElement).scrollTop += amount;
   }
 }
 
-function scrollUp(scrollable, amount = 50) {
+function scrollUp(scrollable: ScrollableElement, amount = 50) {
   if (scrollable.type === 'codemirror') {
     const scrollInfo = scrollable.editor.getScrollInfo();
     scrollable.editor.scrollTo(null, scrollInfo.top - amount);
   } else {
-    scrollable.element.scrollTop -= amount;
+    (scrollable.element as HTMLElement).scrollTop -= amount;
   }
 }
 
-function scrollToTop(scrollable) {
+function scrollToTop(scrollable: ScrollableElement) {
   if (scrollable.type === 'codemirror') {
     scrollable.editor.scrollTo(null, 0);
   } else {
-    scrollable.element.scrollTop = 0;
+    (scrollable.element as HTMLElement).scrollTop = 0;
   }
 }
 
-function scrollToBottom(scrollable) {
+function scrollToBottom(scrollable: ScrollableElement) {
   if (scrollable.type === 'codemirror') {
     const scrollInfo = scrollable.editor.getScrollInfo();
     scrollable.editor.scrollTo(null, scrollInfo.height);
   } else {
-    scrollable.element.scrollTop = scrollable.element.scrollHeight;
+    const element = scrollable.element as HTMLElement;
+    element.scrollTop = element.scrollHeight;
   }
 }
 
-function scrollPageUp(scrollable) {
+function scrollPageUp(scrollable: ScrollableElement) {
   if (scrollable.type === 'codemirror') {
     const scrollInfo = scrollable.editor.getScrollInfo();
     const halfScreen = scrollInfo.clientHeight / 2;
     scrollable.editor.scrollTo(null, scrollInfo.top - halfScreen);
   } else {
-    scrollable.element.scrollTop -= scrollable.element.clientHeight / 2;
+    const element = scrollable.element as HTMLElement;
+    element.scrollTop -= element.clientHeight / 2;
   }
 }
 
-function scrollPageDown(scrollable) {
+function scrollPageDown(scrollable: ScrollableElement) {
   if (scrollable.type === 'codemirror') {
     const scrollInfo = scrollable.editor.getScrollInfo();
     const halfScreen = scrollInfo.clientHeight / 2;
     scrollable.editor.scrollTo(null, scrollInfo.top + halfScreen);
   } else {
-    scrollable.element.scrollTop += scrollable.element.clientHeight / 2;
+    const element = scrollable.element as HTMLElement;
+    element.scrollTop += element.clientHeight / 2;
   }
 }
 
@@ -729,6 +815,16 @@ function focusResponseTab(index) {
 function updateResponseScrollIndicator() {
   const activeTabContent = document.querySelector('.tab-panel.active .tab-panel-content');
   const indicator = document.getElementById('vim-scroll-indicator') || createScrollIndicator();
+
+  // Only show indicators when vim mode is enabled
+  if (!vimMode) {
+    indicator.style.display = 'none';
+    // Remove CodeMirror visual indicators
+    document.querySelectorAll('.CodeMirror.vim-scroll-active').forEach((el) => {
+      el.classList.remove('vim-scroll-active');
+    });
+    return;
+  }
 
   if (activeTabContent && activeTabContent.classList.contains('vim-mode-active')) {
     indicator.style.display = 'block';
@@ -797,15 +893,28 @@ function clearResponsePaneFocus() {
 }
 
 function clearForm() {
-  document.getElementById('method').value = 'GET';
-  document.getElementById('url').value = '';
-  headersEditor.setValue('');
-  bodyEditor.setValue('');
+  const methodEl = document.getElementById('method') as HTMLSelectElement;
+  const urlEl = document.getElementById('url') as HTMLInputElement;
+
+  if (methodEl) {
+    methodEl.value = 'GET';
+  }
+  if (urlEl) {
+    urlEl.value = '';
+  }
+  if (headersEditor) {
+    headersEditor.setValue('');
+  }
+  if (bodyEditor) {
+    bodyEditor.setValue('');
+  }
 
   // Clear form mode headers if in form mode
   if (headersFormMode) {
     const headersList = document.getElementById('headersList');
-    headersList.innerHTML = '';
+    if (headersList) {
+      headersList.innerHTML = '';
+    }
     addHeaderRow('', '');
   }
 
@@ -883,7 +992,7 @@ function deleteSelectedSavedRequest() {
 }
 */
 
-function focusElement(index) {
+function focusElement(index: number) {
   // Remove previous focus indicators
   document.querySelectorAll('.vim-mode-active').forEach((el) => {
     el.classList.remove('vim-mode-active');
@@ -909,7 +1018,7 @@ function focusElement(index) {
     } else {
       // For buttons, also focus them
       if (element.tagName === 'BUTTON') {
-        element.focus();
+        (element as HTMLButtonElement).focus();
       }
     }
   }
@@ -935,22 +1044,32 @@ function enterInsertMode() {
   ) {
     vimInsertMode = true;
     updateVimModeIndicator();
-    element.focus();
+    (element as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement).focus();
     element.classList.remove('vim-mode-active');
   }
 }
 
 function toggleVimHelp() {
+  // Only allow toggling vim help when vim mode is enabled
+  if (!vimMode) {
+    return;
+  }
+
   const vimHelp = document.getElementById('vimHelp');
-  vimHelp.style.display = vimHelp.style.display === 'none' ? 'block' : 'none';
+  if (vimHelp) {
+    vimHelp.style.display = vimHelp.style.display === 'none' ? 'block' : 'none';
+  }
 }
 
 function sendRequest() {
-  const method = document.getElementById('method').value;
-  const url = document.getElementById('url').value;
-  const sendButton = document.getElementById('sendButton');
-  let headers = {};
-  const body = bodyEditor.getValue();
+  const methodEl = document.getElementById('method') as HTMLSelectElement;
+  const urlEl = document.getElementById('url') as HTMLInputElement;
+  const sendButton = document.getElementById('sendButton') as HTMLButtonElement;
+
+  const method = methodEl?.value || 'GET';
+  const url = urlEl?.value || '';
+  let headers: Record<string, string> = {};
+  const body = bodyEditor?.getValue() || '';
 
   if (!url.trim()) {
     alert('Please enter a URL');
@@ -958,9 +1077,11 @@ function sendRequest() {
   }
 
   // Show loading state
-  sendButton.classList.add('send-button-loading');
-  sendButton.disabled = true;
-  sendButton.textContent = '⏳ Sending...';
+  if (sendButton) {
+    sendButton.classList.add('send-button-loading');
+    sendButton.disabled = true;
+    sendButton.textContent = '⏳ Sending...';
+  }
 
   try {
     // Get headers based on current mode
@@ -968,10 +1089,10 @@ function sendRequest() {
       // Form mode - collect from form inputs
       const headerRows = document.querySelectorAll('.header-row');
       headerRows.forEach((row) => {
-        const keyInput = row.querySelector('.header-key');
-        const valueInput = row.querySelector('.header-value');
-        const key = keyInput.value.trim();
-        const value = valueInput.value.trim();
+        const keyInput = row.querySelector('.header-key') as HTMLInputElement;
+        const valueInput = row.querySelector('.header-value') as HTMLInputElement;
+        const key = keyInput?.value?.trim() || '';
+        const value = valueInput?.value?.trim() || '';
 
         if (key && value) {
           headers[key] = value;
@@ -979,7 +1100,7 @@ function sendRequest() {
       });
     } else {
       // JSON mode - parse from editor
-      const headersValue = headersEditor.getValue();
+      const headersValue = headersEditor?.getValue() || '';
       headers = headersValue ? JSON.parse(headersValue) : {};
     }
 
@@ -997,22 +1118,27 @@ function sendRequest() {
   } catch (error) {
     // Reset button state on error
     resetSendButton();
-    alert('Invalid JSON in headers: ' + error.message);
+    alert('Invalid JSON in headers: ' + (error as Error).message);
   }
 }
 
 function resetSendButton() {
-  const sendButton = document.getElementById('sendButton');
-  sendButton.classList.remove('send-button-loading');
-  sendButton.disabled = false;
-  sendButton.textContent = '🚀 Send Request';
+  const sendButton = document.getElementById('sendButton') as HTMLButtonElement;
+  if (sendButton) {
+    sendButton.classList.remove('send-button-loading');
+    sendButton.disabled = false;
+    sendButton.textContent = '🚀 Send Request';
+  }
 }
 
 function saveRequest() {
-  const method = document.getElementById('method').value;
-  const url = document.getElementById('url').value;
-  let headers = {};
-  const body = bodyEditor.getValue();
+  const methodEl = document.getElementById('method') as HTMLSelectElement;
+  const urlEl = document.getElementById('url') as HTMLInputElement;
+
+  const method = methodEl?.value || 'GET';
+  const url = urlEl?.value || '';
+  let headers: Record<string, string> = {};
+  const body = bodyEditor?.getValue() || '';
 
   if (!url.trim()) {
     alert('Please enter a URL to save');
@@ -1025,10 +1151,10 @@ function saveRequest() {
       // Form mode - collect from form inputs
       const headerRows = document.querySelectorAll('.header-row');
       headerRows.forEach((row) => {
-        const keyInput = row.querySelector('.header-key');
-        const valueInput = row.querySelector('.header-value');
-        const key = keyInput.value.trim();
-        const value = valueInput.value.trim();
+        const keyInput = row.querySelector('.header-key') as HTMLInputElement;
+        const valueInput = row.querySelector('.header-value') as HTMLInputElement;
+        const key = keyInput?.value?.trim() || '';
+        const value = valueInput?.value?.trim() || '';
 
         if (key && value) {
           headers[key] = value;
@@ -1036,7 +1162,7 @@ function saveRequest() {
       });
     } else {
       // JSON mode - parse from editor
-      const headersValue = headersEditor.getValue();
+      const headersValue = headersEditor?.getValue() || '';
       headers = headersValue ? JSON.parse(headersValue) : {};
     }
 
@@ -1052,7 +1178,7 @@ function saveRequest() {
       data: data,
     });
   } catch (error) {
-    alert('Invalid JSON in headers: ' + error.message);
+    alert('Invalid JSON in headers: ' + (error as Error).message);
   }
 }
 
@@ -1108,17 +1234,28 @@ function loadRequestFromList(name) {
 }
 */
 
-function loadRequest(request) {
-  document.getElementById('method').value = request.method;
-  document.getElementById('url').value = request.url;
+function loadRequest(request: HttpRequest) {
+  const methodEl = document.getElementById('method') as HTMLSelectElement;
+  const urlEl = document.getElementById('url') as HTMLInputElement;
+
+  if (methodEl) {
+    methodEl.value = request.method;
+  }
+  if (urlEl) {
+    urlEl.value = request.url;
+  }
 
   // Set headers in JSON mode first, then update form if in form mode
-  headersEditor.setValue(JSON.stringify(request.headers, null, 2));
+  if (headersEditor) {
+    headersEditor.setValue(JSON.stringify(request.headers, null, 2));
+  }
   if (headersFormMode) {
     syncJsonToForm();
   }
 
-  bodyEditor.setValue(request.body || '');
+  if (bodyEditor) {
+    bodyEditor.setValue(request.body || '');
+  }
 }
 
 window.addEventListener('message', (event) => {
@@ -1142,7 +1279,7 @@ window.addEventListener('message', (event) => {
   }
 });
 
-function displayResponse(response) {
+function displayResponse(response: HttpResponse) {
   // Reset send button state
   resetSendButton();
 
@@ -1151,9 +1288,15 @@ function displayResponse(response) {
   const statusInfo = document.getElementById('response-status-info');
   const tabsContainer = document.getElementById('response-tabs-container');
 
-  oldResponseDiv.style.display = 'none';
-  statusInfo.style.display = 'block';
-  tabsContainer.style.display = 'flex';
+  if (oldResponseDiv) {
+    oldResponseDiv.style.display = 'none';
+  }
+  if (statusInfo) {
+    statusInfo.style.display = 'block';
+  }
+  if (tabsContainer) {
+    tabsContainer.style.display = 'flex';
+  }
 
   // Update status and size info
   updateResponseStatus(response);
@@ -1167,9 +1310,13 @@ function displayResponse(response) {
   switchResponseTab('body');
 }
 
-function updateResponseStatus(response) {
+function updateResponseStatus(response: HttpResponse & { error?: string; size?: number }) {
   const statusElement = document.getElementById('responseStatus');
   const sizeElement = document.getElementById('responseSize');
+
+  if (!statusElement || !sizeElement) {
+    return;
+  }
 
   if (response.error) {
     statusElement.textContent = 'Error';
@@ -1208,8 +1355,12 @@ function updateResponseStatus(response) {
   }
 }
 
-function updateResponseBody(response) {
+function updateResponseBody(response: HttpResponse & { error?: string }) {
   const bodyContainer = document.getElementById('response-body-content');
+  if (!bodyContainer) {
+    return;
+  }
+
   bodyContainer.innerHTML = '';
 
   // Determine content type and format response
@@ -1293,8 +1444,12 @@ function updateResponseBody(response) {
   }, 100);
 }
 
-function updateResponseHeaders(response) {
+function updateResponseHeaders(response: HttpResponse) {
   const headersContainer = document.getElementById('response-headers-table');
+  if (!headersContainer) {
+    return;
+  }
+
   headersContainer.innerHTML = '';
 
   if (response.headers && Object.keys(response.headers).length > 0) {
@@ -1329,8 +1484,12 @@ function updateResponseHeaders(response) {
   }
 }
 
-function updateResponseInfo(response) {
+function updateResponseInfo(response: HttpResponse & { error?: string; size?: number }) {
   const infoContainer = document.getElementById('response-info-content');
+  if (!infoContainer) {
+    return;
+  }
+
   infoContainer.innerHTML = '';
 
   const generalSection = document.createElement('div');

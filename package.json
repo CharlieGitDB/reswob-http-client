@@ -2,7 +2,7 @@
   "name": "reswob-http-client",
   "displayName": "reswob-http-client",
   "description": "Http client",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "publisher": "reswob",
   "license": "GPL-3.0",
   "repository": {
@@ -166,6 +166,7 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "check-types": "tsc --noEmit",
+    "check-types:webview": "tsc --noEmit --project src/webview/tsconfig.json",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write .",

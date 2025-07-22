@@ -24,6 +24,65 @@ export interface RequestCollection {
   collections: CollectionFolder[];
 }
 
+// Postman Collection Format interfaces
+export interface PostmanCollection {
+  info: {
+    _postman_id?: string;
+    name: string;
+    schema: string;
+    description?: string;
+  };
+  item: PostmanItem[];
+  variable?: PostmanVariable[];
+}
+
+export interface PostmanItem {
+  name: string;
+  request: PostmanRequest;
+  response?: any[];
+  event?: any[];
+}
+
+export interface PostmanRequest {
+  method: string;
+  header: PostmanHeader[];
+  body?: PostmanBody;
+  url: PostmanUrl | string;
+}
+
+export interface PostmanHeader {
+  key: string;
+  value: string;
+  disabled?: boolean;
+}
+
+export interface PostmanBody {
+  mode: 'raw' | 'formdata' | 'urlencoded';
+  raw?: string;
+  formdata?: any[];
+  urlencoded?: any[];
+}
+
+export interface PostmanUrl {
+  raw: string;
+  protocol?: string;
+  host?: string[];
+  path?: string[];
+  query?: PostmanQueryParam[];
+}
+
+export interface PostmanQueryParam {
+  key: string;
+  value: string;
+  disabled?: boolean;
+}
+
+export interface PostmanVariable {
+  key: string;
+  value: string;
+  type?: string;
+}
+
 export interface CollectionFolder {
   name: string;
   requests: string[];
@@ -147,31 +206,213 @@ export class RequestManager {
 
   static async exportToFile(exportPath: string): Promise<void> {
     const collection = await this.loadCollection();
-    fs.writeFileSync(exportPath, JSON.stringify(collection, null, 2));
+
+    // Check if we should export in Postman format
+    if (exportPath.endsWith('.postman_collection.json')) {
+      const postmanCollection = this.convertToPostmanFormat(collection);
+      fs.writeFileSync(exportPath, JSON.stringify(postmanCollection, null, 2));
+    } else {
+      // Export in our native format
+      fs.writeFileSync(exportPath, JSON.stringify(collection, null, 2));
+    }
   }
 
   static async importFromFile(importPath: string): Promise<void> {
     const content = fs.readFileSync(importPath, 'utf-8');
-    const importedCollection: RequestCollection = JSON.parse(content);
+    const importedData = JSON.parse(content);
 
-    const currentCollection = await this.loadCollection();
+    // Check if this is a Postman collection
+    if (this.isPostmanCollection(importedData)) {
+      const convertedCollection = this.convertFromPostmanFormat(importedData as PostmanCollection);
+      const currentCollection = await this.loadCollection();
 
-    // Merge requests, avoiding duplicates by name
-    const existingNames = new Set(currentCollection.requests.map((r) => r.name));
-    const newRequests = importedCollection.requests.filter((r) => !existingNames.has(r.name));
-
-    currentCollection.requests.push(...newRequests);
-
-    // Merge collections, avoiding duplicates by name
-    if (importedCollection.collections) {
-      const existingCollectionNames = new Set(currentCollection.collections.map((c) => c.name));
-      const newCollections = importedCollection.collections.filter(
-        (c) => !existingCollectionNames.has(c.name)
+      // Merge converted requests
+      const existingNames = new Set(currentCollection.requests.map((r) => r.name));
+      const newRequests = convertedCollection.requests.filter(
+        (r: HttpRequest) => !existingNames.has(r.name)
       );
-      currentCollection.collections.push(...newCollections);
+      currentCollection.requests.push(...newRequests);
+
+      // Merge collections if they exist
+      if (convertedCollection.collections) {
+        const existingCollectionNames = new Set(currentCollection.collections.map((c) => c.name));
+        const newCollections = convertedCollection.collections.filter(
+          (c: CollectionFolder) => !existingCollectionNames.has(c.name)
+        );
+        currentCollection.collections.push(...newCollections);
+      }
+
+      await this.saveCollection(currentCollection);
+    } else {
+      // Handle our native format
+      const importedCollection: RequestCollection = importedData;
+      const currentCollection = await this.loadCollection();
+
+      // Merge requests, avoiding duplicates by name
+      const existingNames = new Set(currentCollection.requests.map((r) => r.name));
+      const newRequests = importedCollection.requests.filter((r) => !existingNames.has(r.name));
+      currentCollection.requests.push(...newRequests);
+
+      // Merge collections, avoiding duplicates by name
+      if (importedCollection.collections) {
+        const existingCollectionNames = new Set(currentCollection.collections.map((c) => c.name));
+        const newCollections = importedCollection.collections.filter(
+          (c) => !existingCollectionNames.has(c.name)
+        );
+        currentCollection.collections.push(...newCollections);
+      }
+
+      await this.saveCollection(currentCollection);
+    }
+  }
+
+  // Postman format conversion methods
+  static isPostmanCollection(data: any): data is PostmanCollection {
+    return (
+      data &&
+      data.info &&
+      typeof data.info.name === 'string' &&
+      Array.isArray(data.item) &&
+      (data.info.schema?.includes('postman.com') || data.info.schema?.includes('getpostman.com'))
+    );
+  }
+
+  static convertFromPostmanFormat(postmanCollection: PostmanCollection): RequestCollection {
+    const requests: HttpRequest[] = [];
+
+    // Extract requests from Postman items
+    this.extractRequestsFromPostmanItems(postmanCollection.item, requests);
+
+    return {
+      version: '1.0.0',
+      requests,
+      collections: [], // We'll create a single collection with the name from Postman
+    };
+  }
+
+  static extractRequestsFromPostmanItems(
+    items: PostmanItem[],
+    requests: HttpRequest[],
+    folderName: string = ''
+  ): void {
+    for (const item of items) {
+      if (item.request) {
+        // This is a request item
+        const headers: Record<string, string> = {};
+
+        if (item.request.header) {
+          for (const header of item.request.header) {
+            if (!header.disabled) {
+              headers[header.key] = header.value;
+            }
+          }
+        }
+
+        let url: string;
+        if (typeof item.request.url === 'string') {
+          url = item.request.url;
+        } else {
+          url = item.request.url.raw;
+        }
+
+        let body: string | undefined;
+        if (item.request.body?.mode === 'raw' && item.request.body.raw) {
+          body = item.request.body.raw;
+        }
+
+        const requestName = folderName ? `${folderName} - ${item.name}` : item.name;
+
+        requests.push({
+          name: requestName,
+          method: item.request.method.toUpperCase(),
+          url,
+          headers,
+          body,
+          timestamp: new Date().toISOString(),
+          collection: folderName || undefined,
+        });
+      } else if ((item as any).item) {
+        // This is a folder with nested items
+        const folderItem = item as any;
+        this.extractRequestsFromPostmanItems(folderItem.item, requests, item.name);
+      }
+    }
+  }
+
+  static convertToPostmanFormat(collection: RequestCollection): PostmanCollection {
+    const items: PostmanItem[] = [];
+
+    // Group requests by collection
+    const requestsByCollection = new Map<string, HttpRequest[]>();
+    const uncategorizedRequests: HttpRequest[] = [];
+
+    for (const request of collection.requests) {
+      if (request.collection) {
+        if (!requestsByCollection.has(request.collection)) {
+          requestsByCollection.set(request.collection, []);
+        }
+        requestsByCollection.get(request.collection)!.push(request);
+      } else {
+        uncategorizedRequests.push(request);
+      }
     }
 
-    await this.saveCollection(currentCollection);
+    // Add uncategorized requests directly to the collection
+    for (const request of uncategorizedRequests) {
+      items.push(this.convertRequestToPostmanItem(request));
+    }
+
+    // Add collections as folders
+    for (const [collectionName, requests] of requestsByCollection) {
+      const folderItems = requests.map((request) => this.convertRequestToPostmanItem(request));
+      items.push({
+        name: collectionName,
+        item: folderItems,
+      } as any);
+    }
+
+    return {
+      info: {
+        _postman_id: this.generateUUID(),
+        name: 'Reswob HTTP Client Collection',
+        schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
+        description: 'Collection exported from Reswob HTTP Client',
+      },
+      item: items,
+    };
+  }
+
+  static convertRequestToPostmanItem(request: HttpRequest): PostmanItem {
+    const headers: PostmanHeader[] = [];
+    for (const [key, value] of Object.entries(request.headers)) {
+      headers.push({ key, value });
+    }
+
+    let body: PostmanBody | undefined;
+    if (request.body) {
+      body = {
+        mode: 'raw',
+        raw: request.body,
+      };
+    }
+
+    return {
+      name: request.name,
+      request: {
+        method: request.method,
+        header: headers,
+        body,
+        url: request.url,
+      },
+    };
+  }
+
+  static generateUUID(): string {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
   }
 
   static async createCollection(name: string): Promise<void> {
@@ -923,14 +1164,19 @@ export function activate(context: vscode.ExtensionContext) {
       try {
         const saveUri = await vscode.window.showSaveDialog({
           filters: {
-            'JSON files': ['json'],
+            'Postman Collection': ['postman_collection.json'],
+            'Reswob Collection': ['json'],
+            'All files': ['*'],
           },
-          defaultUri: vscode.Uri.file('reswob-requests.json'),
+          defaultUri: vscode.Uri.file('requests.postman_collection.json'),
         });
 
         if (saveUri) {
           await RequestManager.exportToFile(saveUri.fsPath);
-          vscode.window.showInformationMessage('Requests exported successfully!');
+
+          const isPostmanFormat = saveUri.fsPath.endsWith('.postman_collection.json');
+          const formatName = isPostmanFormat ? 'Postman collection' : 'Reswob collection';
+          vscode.window.showInformationMessage(`Requests exported successfully as ${formatName}!`);
         }
       } catch (error) {
         vscode.window.showErrorMessage(`Failed to export requests: ${error}`);
@@ -944,7 +1190,10 @@ export function activate(context: vscode.ExtensionContext) {
       try {
         const openUri = await vscode.window.showOpenDialog({
           filters: {
-            'JSON files': ['json'],
+            'Collection files': ['json', 'postman_collection.json'],
+            'Postman Collection': ['postman_collection.json'],
+            'Reswob Collection': ['json'],
+            'All files': ['*'],
           },
           canSelectMany: false,
         });
@@ -952,7 +1201,11 @@ export function activate(context: vscode.ExtensionContext) {
         if (openUri && openUri.length > 0) {
           await RequestManager.importFromFile(openUri[0].fsPath);
           provider.refresh();
-          vscode.window.showInformationMessage('Requests imported successfully!');
+
+          const fileName = openUri[0].fsPath.split(/[\\/]/).pop();
+          const isPostmanFormat = fileName?.endsWith('.postman_collection.json');
+          const formatName = isPostmanFormat ? 'Postman collection' : 'collection';
+          vscode.window.showInformationMessage(`${formatName} imported successfully!`);
         }
       } catch (error) {
         vscode.window.showErrorMessage(`Failed to import requests: ${error}`);

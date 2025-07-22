@@ -838,3 +838,20 @@ button:hover {
     box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.5);
   }
 }
+
+/* Hide vim-only elements when vim mode is disabled */
+body:not(.vim-mode-enabled) .vim-only-element,
+body:not(.vim-mode-enabled) #vim-scroll-indicator,
+body:not(.vim-mode-enabled).vim-mode-insert::before,
+body:not(.vim-mode-enabled).vim-mode-normal::before {
+  display: none !important;
+}
+
+/* Show vim elements only when vim mode is enabled */
+body.vim-mode-enabled .vim-only-element {
+  display: block;
+}
+
+body.vim-mode-enabled #vim-scroll-indicator {
+  display: block;
+}

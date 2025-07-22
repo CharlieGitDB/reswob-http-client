@@ -18,11 +18,11 @@ const copyWebviewAssetsPlugin = {
         fs.mkdirSync(distWebviewPath, { recursive: true });
       }
 
-      // Copy webview files
+      // Copy static webview files (HTML and CSS)
       const srcWebviewPath = path.join(__dirname, 'src', 'webview');
-      const filesToCopy = ['index.html', 'styles.css', 'script.js'];
+      const staticFilesToCopy = ['index.html', 'styles.css'];
 
-      filesToCopy.forEach((file) => {
+      staticFilesToCopy.forEach((file) => {
         const srcFile = path.join(srcWebviewPath, file);
         const destFile = path.join(distWebviewPath, file);
         if (fs.existsSync(srcFile)) {
@@ -30,6 +30,8 @@ const copyWebviewAssetsPlugin = {
           console.log(`Copied ${file} to dist/webview/`);
         }
       });
+
+      // Note: script.js is now compiled from TypeScript by the webview build below
     });
   },
 };
@@ -55,7 +57,8 @@ const esbuildProblemMatcherPlugin = {
 };
 
 async function main() {
-  const ctx = await esbuild.context({
+  // Build extension
+  const extensionCtx = await esbuild.context({
     entryPoints: ['src/extension.ts'],
     bundle: true,
     format: 'cjs',
@@ -72,11 +75,30 @@ async function main() {
       esbuildProblemMatcherPlugin,
     ],
   });
+
+  // Build webview script
+  const webviewCtx = await esbuild.context({
+    entryPoints: ['src/webview/script.ts'],
+    bundle: true,
+    format: 'iife',
+    minify: production,
+    sourcemap: !production,
+    sourcesContent: false,
+    platform: 'browser',
+    outfile: 'dist/webview/script.js',
+    target: ['es2022'],
+    logLevel: 'silent',
+    plugins: [esbuildProblemMatcherPlugin],
+  });
+
   if (watch) {
-    await ctx.watch();
+    await extensionCtx.watch();
+    await webviewCtx.watch();
   } else {
-    await ctx.rebuild();
-    await ctx.dispose();
+    await extensionCtx.rebuild();
+    await webviewCtx.rebuild();
+    await extensionCtx.dispose();
+    await webviewCtx.dispose();
   }
 }
 
