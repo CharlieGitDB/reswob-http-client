@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import * as sinon from 'sinon';
 
 interface TreeItem {
-  type: 'new-request' | 'collection' | 'request';
+  type: 'collection' | 'request';
   id: string;
   name: string;
   method?: string;
@@ -50,22 +50,14 @@ class MockReswobHttpClientViewProvider implements vscode.TreeDataProvider<TreeIt
 
   getTreeItem(element: TreeItem): vscode.TreeItem {
     switch (element.type) {
-      case 'new-request': {
-        const item = new vscode.TreeItem('New Request', vscode.TreeItemCollapsibleState.None);
-        item.command = {
-          command: 'reswob-http-client.openHttpClient',
-          title: 'Open HTTP Client',
-          arguments: [],
-        };
-        item.iconPath = new vscode.ThemeIcon('add');
-        item.contextValue = 'new-request';
-        return item;
-      }
       case 'collection': {
-        const item = new vscode.TreeItem(element.name, vscode.TreeItemCollapsibleState.Expanded);
+        const item = new vscode.TreeItem(
+          `📁 ${element.name}`,
+          vscode.TreeItemCollapsibleState.Expanded
+        );
         item.iconPath = new vscode.ThemeIcon('folder');
         item.contextValue = 'collection';
-        item.tooltip = `Collection: ${element.name}`;
+        item.tooltip = `Collection: ${element.name} (Drag requests here to organize)`;
         return item;
       }
       case 'request': {
@@ -93,9 +85,6 @@ class MockReswobHttpClientViewProvider implements vscode.TreeDataProvider<TreeIt
   async getChildren(element?: TreeItem): Promise<TreeItem[]> {
     if (!element) {
       const items: TreeItem[] = [];
-
-      // Always show "New Request" first
-      items.push({ type: 'new-request', id: 'new-request', name: 'New Request' });
 
       // Show mock requests
       for (const requestName of this.mockRequestNames) {
@@ -131,25 +120,6 @@ suite('TreeDataProvider Test Suite', () => {
     sandbox.restore();
   });
 
-  test('getTreeItem creates correct new request item', () => {
-    const newRequestItem: TreeItem = {
-      type: 'new-request',
-      id: 'new-request',
-      name: 'New Request',
-    };
-    const item = treeProvider.getTreeItem(newRequestItem);
-
-    assert.strictEqual(item.label, 'New Request');
-    assert.strictEqual(item.collapsibleState, vscode.TreeItemCollapsibleState.None);
-    assert.ok(item.command);
-    assert.strictEqual(item.command!.command, 'reswob-http-client.openHttpClient');
-    assert.strictEqual(item.command!.title, 'Open HTTP Client');
-    assert.deepStrictEqual(item.command!.arguments, []);
-    assert.ok(item.iconPath instanceof vscode.ThemeIcon);
-    assert.strictEqual((item.iconPath as vscode.ThemeIcon).id, 'add');
-    assert.strictEqual(item.contextValue, 'new-request');
-  });
-
   test('getTreeItem creates correct saved request item', () => {
     const requestItem: TreeItem = {
       type: 'request',
@@ -179,12 +149,12 @@ suite('TreeDataProvider Test Suite', () => {
     };
     const item = treeProvider.getTreeItem(collectionItem);
 
-    assert.strictEqual(item.label, 'My Collection');
+    assert.strictEqual(item.label, '📁 My Collection');
     assert.strictEqual(item.collapsibleState, vscode.TreeItemCollapsibleState.Expanded);
     assert.ok(item.iconPath instanceof vscode.ThemeIcon);
     assert.strictEqual((item.iconPath as vscode.ThemeIcon).id, 'folder');
     assert.strictEqual(item.contextValue, 'collection');
-    assert.strictEqual(item.tooltip, 'Collection: My Collection');
+    assert.strictEqual(item.tooltip, 'Collection: My Collection (Drag requests here to organize)');
   });
 
   test('getChildren returns new request and saved requests for root', async () => {
@@ -193,15 +163,13 @@ suite('TreeDataProvider Test Suite', () => {
 
     const children = await treeProvider.getChildren();
 
-    assert.strictEqual(children.length, 4); // new-request + 3 saved requests
-    assert.strictEqual(children[0].type, 'new-request');
-    assert.strictEqual(children[0].name, 'New Request');
+    assert.strictEqual(children.length, 3); // 3 saved requests
+    assert.strictEqual(children[0].type, 'request');
+    assert.strictEqual(children[0].name, 'Request 1');
     assert.strictEqual(children[1].type, 'request');
-    assert.strictEqual(children[1].name, 'Request 1');
+    assert.strictEqual(children[1].name, 'Request 2');
     assert.strictEqual(children[2].type, 'request');
-    assert.strictEqual(children[2].name, 'Request 2');
-    assert.strictEqual(children[3].type, 'request');
-    assert.strictEqual(children[3].name, 'Request 3');
+    assert.strictEqual(children[2].name, 'Request 3');
   });
 
   test('getChildren returns empty array for non-root elements', async () => {
@@ -220,8 +188,7 @@ suite('TreeDataProvider Test Suite', () => {
 
     const children = await treeProvider.getChildren();
 
-    assert.strictEqual(children.length, 1);
-    assert.strictEqual(children[0].type, 'new-request');
+    assert.strictEqual(children.length, 0);
   });
 
   test('refresh fires onDidChangeTreeData event', () => {
@@ -285,8 +252,8 @@ suite('TreeDataProvider Test Suite', () => {
 
     const children = await treeProvider.getChildren();
 
-    // Skip first element (new-request) and check order
-    const requestChildren = children.slice(1);
+    // Check order of requests
+    const requestChildren = children;
     assert.strictEqual(requestChildren.length, 4);
     orderedRequests.forEach((expectedName, index) => {
       assert.strictEqual(requestChildren[index].name, expectedName);

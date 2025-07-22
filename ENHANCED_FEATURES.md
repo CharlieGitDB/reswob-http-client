@@ -1,10 +1,25 @@
-# Enhanced Tree Data Provider Features
+# Enhanced Tree Data Provider Fe#### Creating Collections
+
+- Click the folder button (📁) in the tree view header to create a new collection
+- Alternatively, click the dropdown arrow next to the plus button and select "New Collection"
+- Enter a name for your collection
+- Collections appear as expandable folders in the tree with "📁" prefix
 
 This document describes the new enhanced features added to the Reswob HTTP Client tree data provider.
 
 ## New Features
 
-### 1. **Method Badges** 🎯
+### 1. **Improved User Experience** ✨
+
+The tree data provider has been enhanced to provide a cleaner and more intuitive interface:
+
+- **Toolbar Actions**: Added dedicated buttons at the top of the tree view - a plus button for creating new requests and a folder button for creating collections
+- **Dropdown Menu**: A dropdown button with a down caret provides quick access to both "New Request" and "New Collection" options
+- **Clean Tree View**: Removed the inline "Create New Request" item from within the tree for a cleaner interface
+- **Always Visible Vim Toggle**: The Vim mode toggle is now always visible in the webview interface
+- **Better Visual Feedback**: All items now include emoji indicators and improved tooltips
+
+### 2. **Method Badges** 🎯
 
 Each HTTP request now displays a colored emoji badge indicating the request method:
 
@@ -17,32 +32,35 @@ Each HTTP request now displays a colored emoji badge indicating the request meth
 - ⚪ **OPTIONS** - White circle
 - ⚫ **UNKNOWN** - Black circle (for any other methods)
 
-### 2. **Collections Support** 📁
+### 3. **Collections Support** 📁
 
 Organize your HTTP requests into collections for better management:
 
 #### Creating Collections
 
-- Click the folder icon (📁) in the tree view header to create a new collection
+- Click the new folder icon (�) in the tree view header to create a new collection
+- When no collections exist, click on the "📁 Create your first collection..." hint
 - Enter a name for your collection
-- Collections appear as expandable folders in the tree
+- Collections appear as expandable folders in the tree with "📁" prefix
 
 #### Managing Requests in Collections
 
 - **Add to Collection**: Right-click on any request → "Add to Collection"
 - **Remove from Collection**: Right-click on a request in a collection → "Remove from Collection"
 - **Drag & Drop**: Drag requests between collections or to the root level
+- **Visual Guidance**: Collections now display helpful tooltips "Drag requests here to organize"
 
-### 3. **Drag and Drop Support** 🔄
+### 4. **Drag and Drop Support** 🔄
 
-Easily reorganize your requests:
+Easily reorganize your requests with improved visual feedback:
 
 - Drag requests from the root level into collections
 - Drag requests between different collections
 - Drag requests out of collections back to the root level
+- Enhanced tooltips guide users on drag and drop functionality
 - Visual feedback during drag operations
 
-### 4. **Enhanced Context Menu** 📋
+### 5. **Enhanced Context Menu** 📋
 
 Right-click on tree items for more options:
 
@@ -57,7 +75,7 @@ Right-click on tree items for more options:
 
 - **Delete Collection** - Remove the collection (requests remain in root)
 
-### 5. **Tree Data Provider Delete Functionality** 🗑️
+### 6. **Tree Data Provider Delete Functionality** 🗑️
 
 Delete functionality has been moved from the webview to the tree data provider:
 
@@ -72,7 +90,7 @@ Delete functionality has been moved from the webview to the tree data provider:
 
 ```typescript
 interface TreeItem {
-  type: 'new-request' | 'collection' | 'request';
+  type: 'collection' | 'request';
   id: string;
   name: string;
   method?: string;

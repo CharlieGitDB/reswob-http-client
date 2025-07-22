@@ -2,6 +2,8 @@
 
 A VS Code extension that provides a built-in HTTP client for testing REST APIs and web services directly within your workspace.
 
+**Current Version: 2.0.1** - Enhanced stability and performance improvements
+
 ## Overview
 
 Reswob HTTP Client is a comprehensive VS Code extension that allows developers to:
@@ -12,6 +14,12 @@ Reswob HTTP Client is a comprehensive VS Code extension that allows developers t
 - Test APIs during development with an intuitive webview interface
 
 ## Features
+
+### ✨ Latest Updates (v2.0.1)
+
+- **Enhanced Stability**: Improved error handling and request processing
+- **Performance Optimizations**: Better memory management and faster tree operations
+- **UI Improvements**: More responsive interface and smoother drag & drop operations
 
 ### 🌐 Built-in HTTP Client
 

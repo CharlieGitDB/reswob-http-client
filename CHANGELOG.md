@@ -4,6 +4,19 @@ All notable changes to the "reswob-http-client" extension will be documented in 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [2.0.1] - 2025-07-22
+
+### Fixed
+- Bug fixes and stability improvements
+- Enhanced error handling for HTTP requests
+- Improved performance for large request collections
+- Fixed tree view refresh issues after drag and drop operations
+
+### Enhanced
+- Better memory management for cached tree data
+- Optimized webview communication for faster response times
+- Improved UI responsiveness during request operations
+
 ## [2.0.0] - 2025-07-21
 
 ### Added

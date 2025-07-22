@@ -90,7 +90,7 @@ export interface CollectionFolder {
 }
 
 export interface TreeItem {
-  type: 'new-request' | 'collection' | 'request';
+  type: 'collection' | 'request';
   id: string;
   name: string;
   method?: string;
@@ -540,22 +540,14 @@ export class ReswobHttpClientViewProvider
 
   getTreeItem(element: TreeItem): vscode.TreeItem {
     switch (element.type) {
-      case 'new-request': {
-        const item = new vscode.TreeItem('New Request', vscode.TreeItemCollapsibleState.None);
-        item.command = {
-          command: 'reswob-http-client.openHttpClient',
-          title: 'Open HTTP Client',
-          arguments: [],
-        };
-        item.iconPath = new vscode.ThemeIcon('add');
-        item.contextValue = 'new-request';
-        return item;
-      }
       case 'collection': {
-        const item = new vscode.TreeItem(element.name, vscode.TreeItemCollapsibleState.Expanded);
+        const item = new vscode.TreeItem(
+          `📁 ${element.name}`,
+          vscode.TreeItemCollapsibleState.Expanded
+        );
         item.iconPath = new vscode.ThemeIcon('folder');
         item.contextValue = 'collection';
-        item.tooltip = `Collection: ${element.name}`;
+        item.tooltip = `Collection: ${element.name} (Drag requests here to organize)`;
         return item;
       }
       case 'request': {
@@ -615,10 +607,7 @@ export class ReswobHttpClientViewProvider
       let items: TreeItem[] = [];
 
       if (!element) {
-        // Root level - show new request, collections, and uncategorized requests
-        // Always show "New Request" first
-        items.push({ type: 'new-request', id: 'new-request', name: 'New Request' });
-
+        // Root level - show collections and uncategorized requests
         // Show collections
         for (const col of collection.collections) {
           items.push({
@@ -672,7 +661,7 @@ export class ReswobHttpClientViewProvider
       return items;
     } catch (error) {
       console.error('Error getting tree children:', error);
-      return [{ type: 'new-request', id: 'new-request', name: 'New Request' }];
+      return [];
     }
   }
 
@@ -698,7 +687,7 @@ export class ReswobHttpClientViewProvider
           if (target?.type === 'collection') {
             // Move request to collection
             await RequestManager.addRequestToCollection(item.name, target.name);
-          } else if (!target || target.type === 'new-request') {
+          } else {
             // Move request to root (uncategorized)
             await RequestManager.removeRequestFromCollection(item.name);
           }

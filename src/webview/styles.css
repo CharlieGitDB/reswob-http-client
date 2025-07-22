@@ -839,8 +839,8 @@ button:hover {
   }
 }
 
-/* Hide vim-only elements when vim mode is disabled */
-body:not(.vim-mode-enabled) .vim-only-element,
+/* Hide vim-only elements when vim mode is disabled, but keep the toggle visible */
+body:not(.vim-mode-enabled) .vim-only-element:not(.vim-mode-container),
 body:not(.vim-mode-enabled) #vim-scroll-indicator,
 body:not(.vim-mode-enabled).vim-mode-insert::before,
 body:not(.vim-mode-enabled).vim-mode-normal::before {
@@ -850,6 +850,11 @@ body:not(.vim-mode-enabled).vim-mode-normal::before {
 /* Show vim elements only when vim mode is enabled */
 body.vim-mode-enabled .vim-only-element {
   display: block;
+}
+
+/* Always show the vim mode toggle */
+.vim-mode-container {
+  display: block !important;
 }
 
 body.vim-mode-enabled #vim-scroll-indicator {

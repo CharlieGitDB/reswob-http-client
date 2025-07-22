@@ -2,7 +2,7 @@
   "name": "reswob-http-client",
   "displayName": "reswob-http-client",
   "description": "Http client",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "publisher": "reswob",
   "license": "GPL-3.0",
   "repository": {
@@ -27,7 +27,8 @@
       },
       {
         "command": "reswob-http-client.openHttpClient",
-        "title": "Open HTTP Client"
+        "title": "New Request",
+        "icon": "$(add)"
       },
       {
         "command": "reswob-http-client.saveRequest",
@@ -57,8 +58,8 @@
       },
       {
         "command": "reswob-http-client.createCollection",
-        "title": "Create Collection",
-        "icon": "$(folder-opened)"
+        "title": "New Collection",
+        "icon": "$(new-folder)"
       },
       {
         "command": "reswob-http-client.addToCollection",
@@ -78,6 +79,13 @@
         }
       ]
     },
+    "submenus": [
+      {
+        "id": "reswob-http-client.createMenu",
+        "label": "Create",
+        "icon": "$(chevron-down)"
+      }
+    ],
     "views": {
       "reswob-http-client": [
         {
@@ -94,9 +102,29 @@
     "menus": {
       "view/title": [
         {
+          "command": "reswob-http-client.openHttpClient",
+          "when": "view == reswobHttpClientView",
+          "group": "navigation@1"
+        },
+        {
           "command": "reswob-http-client.createCollection",
           "when": "view == reswobHttpClientView",
-          "group": "navigation"
+          "group": "navigation@2"
+        },
+        {
+          "submenu": "reswob-http-client.createMenu",
+          "when": "view == reswobHttpClientView",
+          "group": "navigation@3"
+        }
+      ],
+      "reswob-http-client.createMenu": [
+        {
+          "command": "reswob-http-client.openHttpClient",
+          "group": "create@1"
+        },
+        {
+          "command": "reswob-http-client.createCollection",
+          "group": "create@2"
         }
       ],
       "view/item/context": [
