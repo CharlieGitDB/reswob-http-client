@@ -279,20 +279,33 @@ export class RequestManager {
 
   static convertFromPostmanFormat(postmanCollection: PostmanCollection): RequestCollection {
     const requests: HttpRequest[] = [];
+    const collections: CollectionFolder[] = [];
 
-    // Extract requests from Postman items
-    this.extractRequestsFromPostmanItems(postmanCollection.item, requests);
+    // Extract requests from Postman items and track collections
+    const collectionMap = new Map<string, string[]>(); // folder name -> request names
+    this.extractRequestsFromPostmanItems(postmanCollection.item, requests, collectionMap);
+
+    // Create collections from the map
+    for (const [collectionName, requestNames] of collectionMap.entries()) {
+      if (requestNames.length > 0) {
+        collections.push({
+          name: collectionName,
+          requests: requestNames,
+        });
+      }
+    }
 
     return {
       version: '1.0.0',
       requests,
-      collections: [], // We'll create a single collection with the name from Postman
+      collections,
     };
   }
 
   static extractRequestsFromPostmanItems(
     items: PostmanItem[],
     requests: HttpRequest[],
+    collectionMap: Map<string, string[]>,
     folderName: string = ''
   ): void {
     for (const item of items) {
@@ -322,7 +335,7 @@ export class RequestManager {
 
         const requestName = folderName ? `${folderName} - ${item.name}` : item.name;
 
-        requests.push({
+        const newRequest: HttpRequest = {
           name: requestName,
           method: item.request.method.toUpperCase(),
           url,
@@ -330,11 +343,21 @@ export class RequestManager {
           body,
           timestamp: new Date().toISOString(),
           collection: folderName || undefined,
-        });
+        };
+
+        requests.push(newRequest);
+
+        // Track requests in collections
+        if (folderName) {
+          if (!collectionMap.has(folderName)) {
+            collectionMap.set(folderName, []);
+          }
+          collectionMap.get(folderName)!.push(requestName);
+        }
       } else if ((item as any).item) {
         // This is a folder with nested items
         const folderItem = item as any;
-        this.extractRequestsFromPostmanItems(folderItem.item, requests, item.name);
+        this.extractRequestsFromPostmanItems(folderItem.item, requests, collectionMap, item.name);
       }
     }
   }

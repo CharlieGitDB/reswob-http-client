@@ -1188,6 +1188,11 @@ function importRequests() {
   });
 }
 
+// Expose functions immediately after definition to prevent tree-shaking
+(window as any).sendRequest = sendRequest;
+(window as any).saveRequest = saveRequest;
+(window as any).importRequests = importRequests;
+
 // Commented out - saved requests are now managed in the tree view
 /*
 function loadSavedRequests() {

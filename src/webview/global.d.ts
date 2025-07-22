@@ -9,6 +9,9 @@ declare global {
 
   interface Window {
     removeHeaderRow: (btn: any) => void;
+    sendRequest: () => void;
+    saveRequest: () => void;
+    importRequests: () => void;
   }
 }
 

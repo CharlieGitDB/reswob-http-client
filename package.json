@@ -44,7 +44,8 @@
       },
       {
         "command": "reswob-http-client.importRequests",
-        "title": "Import Requests"
+        "title": "Import Requests",
+        "icon": "$(cloud-download)"
       },
       {
         "command": "reswob-http-client.deleteRequest",
@@ -125,6 +126,10 @@
         {
           "command": "reswob-http-client.createCollection",
           "group": "create@2"
+        },
+        {
+          "command": "reswob-http-client.importRequests",
+          "group": "create@3"
         }
       ],
       "view/item/context": [
