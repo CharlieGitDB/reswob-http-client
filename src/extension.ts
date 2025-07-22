@@ -41,6 +41,8 @@ export interface TreeItem {
 export class RequestManager {
   private static readonly REQUESTS_FOLDER = '.reswob-requests';
   private static readonly COLLECTION_FILE = 'requests.json';
+  private static cachedCollection: RequestCollection | null = null;
+  private static lastModified: number = 0;
 
   static async ensureRequestsFolder(): Promise<string> {
     if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
@@ -65,7 +67,16 @@ export class RequestManager {
   static async loadCollection(): Promise<RequestCollection> {
     try {
       const collectionPath = await this.getCollectionPath();
+
       if (fs.existsSync(collectionPath)) {
+        // Check if file was modified since last cache
+        const stats = fs.statSync(collectionPath);
+        const currentModified = stats.mtimeMs;
+
+        if (this.cachedCollection && this.lastModified === currentModified) {
+          return this.cachedCollection;
+        }
+
         const content = fs.readFileSync(collectionPath, 'utf-8');
         const parsed = JSON.parse(content);
 
@@ -74,23 +85,38 @@ export class RequestManager {
           parsed.collections = [];
         }
 
+        // Update cache
+        this.cachedCollection = parsed;
+        this.lastModified = currentModified;
+
         return parsed;
       }
     } catch (error) {
       console.error('Error loading collection:', error);
     }
 
-    return {
+    const defaultCollection: RequestCollection = {
       version: '1.0.0',
       requests: [],
       collections: [],
     };
+
+    // Cache default collection
+    this.cachedCollection = defaultCollection;
+    this.lastModified = 0;
+
+    return defaultCollection;
   }
 
   static async saveCollection(collection: RequestCollection): Promise<void> {
     try {
       const collectionPath = await this.getCollectionPath();
       fs.writeFileSync(collectionPath, JSON.stringify(collection, null, 2));
+
+      // Update cache after successful save
+      this.cachedCollection = collection;
+      const stats = fs.statSync(collectionPath);
+      this.lastModified = stats.mtimeMs;
     } catch (error) {
       console.error('Error saving collection:', error);
       throw error;
@@ -240,6 +266,11 @@ export class RequestManager {
 
     await this.saveCollection(collection);
   }
+
+  static invalidateCache(): void {
+    this.cachedCollection = null;
+    this.lastModified = 0;
+  }
 }
 
 export class ReswobHttpClientViewProvider
@@ -254,7 +285,15 @@ export class ReswobHttpClientViewProvider
   dropMimeTypes = ['application/vnd.code.tree.reswobHttpClientView'];
   dragMimeTypes = ['application/vnd.code.tree.reswobHttpClientView'];
 
+  // Performance caching
+  private cachedChildren: Map<string, TreeItem[]> = new Map();
+  private cacheValid = false;
+
   refresh(): void {
+    // Clear cache on refresh
+    this.cachedChildren.clear();
+    this.cacheValid = false;
+    RequestManager.invalidateCache();
     this._onDidChangeTreeData.fire();
   }
 
@@ -323,12 +362,19 @@ export class ReswobHttpClientViewProvider
 
   async getChildren(element?: TreeItem): Promise<TreeItem[]> {
     try {
+      // Create cache key
+      const cacheKey = element ? `${element.type}:${element.name}` : 'root';
+
+      // Check cache first (only for short-term caching during tree expansion)
+      if (this.cacheValid && this.cachedChildren.has(cacheKey)) {
+        return this.cachedChildren.get(cacheKey)!;
+      }
+
       const collection = await RequestManager.loadCollection();
+      let items: TreeItem[] = [];
 
       if (!element) {
         // Root level - show new request, collections, and uncategorized requests
-        const items: TreeItem[] = [];
-
         // Always show "New Request" first
         items.push({ type: 'new-request', id: 'new-request', name: 'New Request' });
 
@@ -351,35 +397,38 @@ export class ReswobHttpClientViewProvider
             method: request.method,
           });
         }
-
-        return items;
       } else if (element.type === 'collection') {
         // Show requests in this collection
         const collectionName = element.name;
         const collectionFolder = collection.collections.find((c) => c.name === collectionName);
 
-        if (!collectionFolder) {
-          return [];
-        }
-
-        const items: TreeItem[] = [];
-        for (const requestName of collectionFolder.requests) {
-          const request = collection.requests.find((r) => r.name === requestName);
-          if (request) {
-            items.push({
-              type: 'request',
-              id: `request:${request.name}`,
-              name: request.name,
-              method: request.method,
-              collection: collectionName,
-            });
+        if (collectionFolder) {
+          for (const requestName of collectionFolder.requests) {
+            const request = collection.requests.find((r) => r.name === requestName);
+            if (request) {
+              items.push({
+                type: 'request',
+                id: `request:${request.name}`,
+                name: request.name,
+                method: request.method,
+                collection: collectionName,
+              });
+            }
           }
         }
-
-        return items;
       }
 
-      return [];
+      // Cache the result temporarily
+      this.cachedChildren.set(cacheKey, items);
+      this.cacheValid = true;
+
+      // Clear cache after a short delay to prevent stale data
+      setTimeout(() => {
+        this.cacheValid = false;
+        this.cachedChildren.clear();
+      }, 1000);
+
+      return items;
     } catch (error) {
       console.error('Error getting tree children:', error);
       return [{ type: 'new-request', id: 'new-request', name: 'New Request' }];

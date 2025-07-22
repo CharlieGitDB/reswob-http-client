@@ -65,8 +65,39 @@
       }
     },
     {
+      "label": "format-lint-compile",
+      "dependsOrder": "sequence",
+      "dependsOn": ["npm: format", "npm: lint:fix", "npm: compile"],
+      "group": "build",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "type": "npm",
+      "script": "format",
+      "group": "build",
+      "label": "npm: format",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "lint:fix",
+      "group": "build",
+      "label": "npm: lint:fix",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
+    },
+    {
       "label": "setup-test-workspace",
-      "dependsOn": "npm: compile",
+      "dependsOn": "format-lint-compile",
       "type": "shell",
       "command": "node",
       "args": ["scripts/setup-test-workspace.js"],

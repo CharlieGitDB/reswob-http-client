@@ -12,16 +12,6 @@ body {
   margin: 0 auto;
 }
 
-.vim-mode-toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--vscode-input-border);
-  margin-bottom: 15px;
-  position: relative;
-}
-
 .toggle-switch {
   position: relative;
   display: inline-block;
@@ -143,6 +133,10 @@ input:checked + .toggle-slider:before {
   z-index: 1000;
 }
 
+.vim-help-container {
+  position: relative;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -150,6 +144,38 @@ input:checked + .toggle-slider:before {
   margin-bottom: 20px;
   border-bottom: 1px solid var(--vscode-input-border);
   padding-bottom: 15px;
+}
+
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.title-section h1 {
+  margin: 0;
+}
+
+.title-reswob {
+  color: var(--vscode-charts-green, #4caf50);
+  text-shadow: 0 0 3px var(--vscode-charts-green, #4caf50);
+}
+
+.title-http-client {
+  color: var(--vscode-foreground);
+}
+
+.vim-mode-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Loading state for send button */
+.send-button-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.7;
 }
 
 .button-group {
@@ -213,8 +239,8 @@ textarea {
 /* CodeMirror syntax highlighting styles */
 .CodeMirror {
   border: 1px solid var(--vscode-input-border);
-  background-color: var(--vscode-input-background) !important;
-  color: var(--vscode-input-foreground) !important;
+  background-color: var(--vscode-editor-background) !important;
+  color: var(--vscode-editor-foreground) !important;
   border-radius: 3px;
   font-family: var(--vscode-editor-font-family);
   font-size: var(--vscode-editor-font-size);
@@ -412,10 +438,338 @@ button:hover {
 }
 
 .delete-button:hover {
+.delete-button:hover {
   background-color: var(--vscode-errorForeground);
   opacity: 0.8;
 }
-*/
+
+/* Headers form/JSON toggle styles */
+.headers-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.headers-toggle {
+  display: flex;
+  align-items: center;
+}
+
+.mode-toggle-btn {
+  background-color: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: 1px solid var(--vscode-input-border);
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mode-toggle-btn:hover {
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+.headers-mode-container {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.headers-form-container {
+  background-color: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 3px;
+  padding: 10px;
+}
+
+.headers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.header-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.header-row input[type='text'] {
+  flex: 1;
+  padding: 6px 8px;
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+.header-row input[type='text']:focus {
+  outline: none;
+  border-color: var(--vscode-focusBorder);
+}
+
+.header-row .header-key {
+  min-width: 120px;
+}
+
+.header-row .header-value {
+  flex: 2;
+}
+
+.remove-header-btn {
+  background-color: var(--vscode-errorForeground);
+  color: white;
+  border: none;
+  padding: 6px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  min-width: 24px;
+}
+
+.remove-header-btn:hover {
+  opacity: 0.8;
+}
+
+.add-header-btn {
+  background-color: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: 1px solid var(--vscode-input-border);
+  padding: 6px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.add-header-btn:hover {
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+/* Response status and tabs styles */
+.response-status-info {
+  padding: 10px;
+  background-color: var(--vscode-editor-background);
+  border-bottom: 1px solid var(--vscode-input-border);
+}
+
+.response-status {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.status-badge.success {
+  background-color: var(--vscode-charts-green);
+  color: white;
+}
+
+.status-badge.error {
+  background-color: var(--vscode-charts-red);
+  color: white;
+}
+
+.status-badge.warning {
+  background-color: var(--vscode-charts-orange);
+  color: white;
+}
+
+.status-badge.info {
+  background-color: var(--vscode-charts-blue);
+  color: white;
+}
+
+.size-info {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.response-tabs-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--vscode-editor-background);
+  height: 100%;
+  min-height: 500px;
+}
+
+.response-tabs {
+  display: flex;
+  background-color: var(--vscode-editor-background);
+  border-bottom: 1px solid var(--vscode-input-border);
+}
+
+.tab-btn {
+  padding: 12px 16px;
+  background-color: transparent;
+  color: var(--vscode-foreground);
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.tab-btn.active {
+  border-bottom-color: var(--vscode-focusBorder);
+  background-color: var(--vscode-tab-activeBackground);
+}
+
+.tab-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.tab-panel {
+  display: none;
+  flex: 1;
+  padding: 10px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.tab-panel.active {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Make tab content focusable for vim navigation */
+.tab-panel-content {
+  flex: 1;
+  overflow: auto;
+  outline: none;
+  position: relative;
+}
+
+.tab-panel-content:focus {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: -2px;
+}
+
+.tab-panel-content.vim-mode-active {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: -2px;
+}
+
+.headers-table-container {
+  flex: 1;
+  overflow: auto;
+}
+
+.headers-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--vscode-editor-background);
+}
+
+.headers-table th,
+.headers-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--vscode-input-border);
+}
+
+.headers-table th {
+  background-color: var(--vscode-list-hoverBackground);
+  font-weight: bold;
+  color: var(--vscode-foreground);
+  font-size: 12px;
+}
+
+.headers-table td {
+  font-size: 13px;
+  color: var(--vscode-foreground);
+}
+
+.headers-table tr:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.response-info {
+  flex: 1;
+  overflow: auto;
+}
+
+.info-section {
+  margin-bottom: 20px;
+}
+
+.info-section h4 {
+  margin: 0 0 8px 0;
+  color: var(--vscode-foreground);
+  font-size: 14px;
+  border-bottom: 1px solid var(--vscode-input-border);
+  padding-bottom: 4px;
+}
+
+.info-item {
+  display: flex;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.info-label {
+  font-weight: bold;
+  color: var(--vscode-foreground);
+  min-width: 120px;
+}
+
+.info-value {
+  color: var(--vscode-descriptionForeground);
+  word-break: break-all;
+}
+
+#response-body-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 400px;
+}
+
+#response-body-content .CodeMirror {
+  flex: 1;
+  height: 100% !important;
+  min-height: 400px;
+  background-color: var(--vscode-editor-background) !important;
+  color: var(--vscode-editor-foreground) !important;
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 4px;
+}
+
+#response-body-content .CodeMirror-scroll {
+  height: 100% !important;
+  overflow-y: auto !important;
+  max-height: none;
+}
+
+#response-body-content .CodeMirror-gutters {
+  background-color: var(--vscode-editorGutter-background) !important;
+  border-right: 1px solid var(--vscode-input-border) !important;
+}
+
+#response-body-content .CodeMirror-linenumber {
+  color: var(--vscode-editorLineNumber-foreground) !important;
+}
 
 /* Responsive layout for smaller screens */
 @media (max-width: 768px) {
@@ -431,5 +785,56 @@ button:hover {
 
   .response {
     min-height: 300px;
+  }
+}
+
+/* Vim mode improvements */
+.tab-panel-content.vim-mode-active {
+  outline: 2px solid var(--vscode-focusBorder, #007acc);
+  outline-offset: -2px;
+  background-color: var(--vscode-editor-selectionBackground, rgba(0, 122, 204, 0.1));
+}
+
+.tab-btn.vim-mode-active {
+  background-color: var(--vscode-button-background) !important;
+  color: var(--vscode-button-foreground) !important;
+  border: 2px solid var(--vscode-focusBorder, #007acc);
+}
+
+#vim-scroll-indicator {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  z-index: 1000;
+  display: none;
+  max-width: 400px;
+  font-family: var(--vscode-editor-font-family, monospace);
+  border: 1px solid var(--vscode-focusBorder, #007acc);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Better vim focus indicators */
+.vim-mode-active {
+  animation: vim-pulse 2s infinite;
+}
+
+/* CodeMirror vim scroll mode indicator */
+.CodeMirror.vim-scroll-active {
+  border: 2px solid var(--vscode-focusBorder, #007acc) !important;
+  box-shadow: 0 0 0 1px rgba(0, 122, 204, 0.3) !important;
+}
+
+@keyframes vim-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--vscode-focusBorder, #007acc);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.5);
   }
 }

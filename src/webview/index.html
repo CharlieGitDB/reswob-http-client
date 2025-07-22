@@ -31,30 +31,39 @@
   </head>
   <body>
     <div class="container">
-      <div class="vim-mode-toggle">
-        <label class="toggle-switch">
-          <input type="checkbox" id="vimModeToggle" />
-          <span class="toggle-slider"></span>
-        </label>
-        <span class="toggle-label">Vim Mode</span>
+      <div class="vim-help-container">
         <div class="vim-help" id="vimHelp" style="display: none">
           <strong>Vim Commands:</strong>
           <ul>
             <li><kbd>j/k</kbd> - Move down/up within form</li>
+            <li><kbd>h/l</kbd> - Switch between panes (form/response)</li>
             <li><kbd>Tab</kbd> - Focus next field</li>
             <li><kbd>Shift+Tab</kbd> - Focus previous field</li>
             <li><kbd>i</kbd> - Enter insert mode (edit field)</li>
             <li><kbd>Esc</kbd> - Exit insert mode</li>
-            <li><kbd>Enter</kbd> - Send request</li>
+            <li><kbd>Ctrl+Enter</kbd> / <kbd>Cmd+Enter</kbd> - Send request</li>
+            <li><kbd>Ctrl+Space</kbd> / <kbd>Cmd+Space</kbd> - Toggle vim mode</li>
+            <li><kbd>n</kbd> - New request (clear form)</li>
             <li><kbd>s</kbd> - Save current request</li>
             <li><kbd>?</kbd> - Toggle this help</li>
           </ul>
-          <p><strong>Note:</strong> Saved requests are now managed in the tree view sidebar.</p>
         </div>
       </div>
 
       <div class="header">
-        <h1>HTTP Client</h1>
+        <div class="title-section">
+          <h1>
+            <span class="title-reswob">Reswob</span>
+            <span class="title-http-client">HTTP Client</span>
+          </h1>
+          <div class="vim-mode-container">
+            <label class="toggle-switch">
+              <input type="checkbox" id="vimModeToggle" />
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label">Vim Mode</span>
+          </div>
+        </div>
         <div class="button-group">
           <button onclick="importRequests()" class="secondary-button">📥 Import Requests</button>
         </div>
@@ -80,8 +89,25 @@
             </div>
 
             <div class="form-group">
-              <label for="headers">Headers (JSON):</label>
-              <div id="headers"></div>
+              <div class="headers-controls">
+                <label for="headers">Headers:</label>
+                <div class="headers-toggle">
+                  <button type="button" id="headersModeToggle" class="mode-toggle-btn">
+                    📝 Switch to Form
+                  </button>
+                </div>
+              </div>
+              <div id="headers-json-mode" class="headers-mode-container">
+                <div id="headers"></div>
+              </div>
+              <div id="headers-form-mode" class="headers-mode-container" style="display: none">
+                <div class="headers-form-container">
+                  <div id="headersList" class="headers-list"></div>
+                  <button type="button" id="addHeaderBtn" class="add-header-btn">
+                    + Add Header
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div class="form-group">
@@ -90,13 +116,48 @@
             </div>
 
             <div class="button-group">
-              <button onclick="sendRequest()">🚀 Send Request</button>
+              <button id="sendButton" onclick="sendRequest()">🚀 Send Request</button>
               <button onclick="saveRequest()" class="secondary-button">💾 Save Request</button>
             </div>
           </div>
         </div>
 
         <div class="right-panel">
+          <div id="response-status-info" class="response-status-info" style="display: none">
+            <div class="response-status">
+              <span id="responseStatus" class="status-badge"></span>
+              <span id="responseSize" class="size-info"></span>
+            </div>
+          </div>
+
+          <div id="response-tabs-container" class="response-tabs-container" style="display: none">
+            <div class="response-tabs">
+              <button class="tab-btn active" data-tab="body">Response Body</button>
+              <button class="tab-btn" data-tab="headers">Headers</button>
+              <button class="tab-btn" data-tab="info">Info</button>
+            </div>
+
+            <div class="tab-content">
+              <div id="tab-body" class="tab-panel active">
+                <div class="tab-panel-content" tabindex="0">
+                  <div id="response-body-content"></div>
+                </div>
+              </div>
+
+              <div id="tab-headers" class="tab-panel">
+                <div class="tab-panel-content" tabindex="0">
+                  <div id="response-headers-table" class="headers-table-container"></div>
+                </div>
+              </div>
+
+              <div id="tab-info" class="tab-panel">
+                <div class="tab-panel-content" tabindex="0">
+                  <div id="response-info-content" class="response-info"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div id="response" class="response" style="display: none"></div>
         </div>
       </div>
