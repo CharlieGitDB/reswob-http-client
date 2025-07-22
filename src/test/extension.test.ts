@@ -116,7 +116,7 @@ suite('Extension Test Suite', () => {
   test('Extension activation', async () => {
     // Mock command registration
     const registerCommandStub = sandbox.stub(vscode.commands, 'registerCommand');
-    const registerTreeDataProviderStub = sandbox.stub(vscode.window, 'registerTreeDataProvider');
+    const registerTreeDataProviderStub = sandbox.stub(vscode.window, 'createTreeView');
 
     await activate(mockExtensionContext);
 
@@ -131,7 +131,7 @@ suite('Extension Test Suite', () => {
     assert.ok(registerTreeDataProviderStub.calledWith('reswobHttpClientView'));
 
     // Verify subscriptions are added
-    assert.strictEqual(mockExtensionContext.subscriptions.length, 5);
+    assert.strictEqual(mockExtensionContext.subscriptions.length, 11);
   });
 
   test('Extension deactivation', () => {

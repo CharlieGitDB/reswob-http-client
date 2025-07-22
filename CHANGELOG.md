@@ -4,6 +4,30 @@ All notable changes to the "reswob-http-client" extension will be documented in 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [2.0.3] - 2025-07-22
+
+### Fixed
+- **Test Suite Compatibility**: Resolved test framework interface issues
+  - Fixed Mocha test interface mismatch between BDD and TDD styles
+  - Updated TypeScript compilation configuration for test files
+  - Corrected VS Code test configuration to use TDD interface
+- **Boolean Coercion Bug**: Fixed `isPostmanCollection` method returning `null` instead of `false`
+- **Test File Path Issues**: Corrected webview test file path references
+- **Extension Activation Tests**: Updated test mocks to match current VS Code API usage
+
+### Enhanced
+- **Development Experience**: Improved test reliability and maintainability
+  - Created separate TypeScript configuration for test compilation
+  - Updated npm scripts for better test compilation workflow
+  - Enhanced test coverage validation
+- **Code Quality**: All 101 tests now passing with 100% success rate
+
+### Technical Improvements
+- Added proper boolean coercion with `!!` operator for type predicates
+- Fixed TypeScript compilation exclusions for test files
+- Updated VS Code test runner configuration with explicit Mocha TDD interface
+- Improved test setup and teardown procedures
+
 ## [2.0.1] - 2025-07-22
 
 ### Fixed

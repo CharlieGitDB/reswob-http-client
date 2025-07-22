@@ -268,7 +268,7 @@ export class RequestManager {
 
   // Postman format conversion methods
   static isPostmanCollection(data: any): data is PostmanCollection {
-    return (
+    return !!(
       data &&
       data.info &&
       typeof data.info.name === 'string' &&

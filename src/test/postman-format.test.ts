@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { RequestManager, PostmanCollection, HttpRequest, RequestCollection } from '../extension';
 
-describe('Postman Format Conversion', () => {
+suite('Postman Format Conversion', () => {
   const samplePostmanCollection: PostmanCollection = {
     info: {
       _postman_id: '12345678-abcd-1234-abcd-123456789012',
@@ -86,13 +86,13 @@ describe('Postman Format Conversion', () => {
     collections: [],
   };
 
-  describe('isPostmanCollection', () => {
-    it('should identify valid Postman collections', () => {
+  suite('isPostmanCollection', () => {
+    test('should identify valid Postman collections', () => {
       const result = RequestManager.isPostmanCollection(samplePostmanCollection);
       assert.strictEqual(result, true);
     });
 
-    it('should reject invalid objects', () => {
+    test('should reject invalid objects', () => {
       assert.strictEqual(RequestManager.isPostmanCollection(null), false);
       assert.strictEqual(RequestManager.isPostmanCollection({}), false);
       assert.strictEqual(RequestManager.isPostmanCollection({ info: {} }), false);
@@ -103,7 +103,7 @@ describe('Postman Format Conversion', () => {
       );
     });
 
-    it('should accept collections with postman.com schema', () => {
+    test('should accept collections with postman.com schema', () => {
       const validCollection = {
         info: {
           name: 'Test',
@@ -114,7 +114,7 @@ describe('Postman Format Conversion', () => {
       assert.strictEqual(RequestManager.isPostmanCollection(validCollection), true);
     });
 
-    it('should accept collections with getpostman.com schema', () => {
+    test('should accept collections with getpostman.com schema', () => {
       const validCollection = {
         info: {
           name: 'Test',
@@ -126,8 +126,8 @@ describe('Postman Format Conversion', () => {
     });
   });
 
-  describe('convertFromPostmanFormat', () => {
-    it('should convert Postman collection to Reswob format', () => {
+  suite('convertFromPostmanFormat', () => {
+    test('should convert Postman collection to Reswob format', () => {
       const result = RequestManager.convertFromPostmanFormat(samplePostmanCollection);
 
       assert.strictEqual(result.version, '1.0.0');
@@ -150,7 +150,7 @@ describe('Postman Format Conversion', () => {
       assert.strictEqual(postRequest.body, '{"name": "John Doe", "email": "john@example.com"}');
     });
 
-    it('should handle empty collections', () => {
+    test('should handle empty collections', () => {
       const emptyCollection: PostmanCollection = {
         info: {
           name: 'Empty Collection',
@@ -164,8 +164,8 @@ describe('Postman Format Conversion', () => {
     });
   });
 
-  describe('convertToPostmanFormat', () => {
-    it('should convert Reswob collection to Postman format', () => {
+  suite('convertToPostmanFormat', () => {
+    test('should convert Reswob collection to Postman format', () => {
       const result = RequestManager.convertToPostmanFormat(sampleReswobCollection);
 
       assert.strictEqual(result.info.name, 'Reswob HTTP Client Collection');
@@ -195,7 +195,7 @@ describe('Postman Format Conversion', () => {
       );
     });
 
-    it('should group requests by collection into folders', () => {
+    test('should group requests by collection into folders', () => {
       const collectionWithFolders: RequestCollection = {
         version: '1.0.0',
         requests: [
@@ -257,8 +257,8 @@ describe('Postman Format Conversion', () => {
     });
   });
 
-  describe('generateUUID', () => {
-    it('should generate valid UUIDs', () => {
+  suite('generateUUID', () => {
+    test('should generate valid UUIDs', () => {
       const uuid1 = RequestManager.generateUUID();
       const uuid2 = RequestManager.generateUUID();
 

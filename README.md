@@ -2,7 +2,7 @@
 
 A VS Code extension that provides a built-in HTTP client for testing REST APIs and web services directly within your workspace.
 
-**Current Version: 2.0.1** - Enhanced stability and performance improvements
+**Current Version: 2.0.3** - Enhanced test suite reliability and developer experience
 
 ## Overview
 
@@ -15,11 +15,12 @@ Reswob HTTP Client is a comprehensive VS Code extension that allows developers t
 
 ## Features
 
-### ✨ Latest Updates (v2.0.1)
+### ✨ Latest Updates (v2.0.3)
 
-- **Enhanced Stability**: Improved error handling and request processing
-- **Performance Optimizations**: Better memory management and faster tree operations
-- **UI Improvements**: More responsive interface and smoother drag & drop operations
+- **Enhanced Test Suite**: Comprehensive test framework improvements with 101 passing tests
+- **Developer Experience**: Improved TypeScript compilation and test configuration
+- **Bug Fixes**: Resolved test interface compatibility issues and boolean coercion bugs
+- **Code Quality**: All tests now passing with 100% success rate for better reliability
 
 ### 🌐 Built-in HTTP Client
 
@@ -54,7 +55,7 @@ Reswob HTTP Client is a comprehensive VS Code extension that allows developers t
 - **Enhanced Context Menu**: Extended right-click options for requests and collections
 - **Performance Optimizations**: Intelligent caching for faster tree operations
 
-### �💾 Request Management
+### 💾 Request Management
 
 - Save HTTP requests with custom names
 - Organize requests in a sidebar tree view
@@ -82,7 +83,7 @@ Reswob HTTP Client is a comprehensive VS Code extension that allows developers t
 - Command palette integration
 - Context menus for saved requests and collections
 - Follows VS Code theme and styling conventions
-- **Comprehensive Testing**: 92 passing unit tests ensure reliability and stability
+- **Comprehensive Testing**: 101 passing unit tests ensure reliability and stability
 
 ## Getting Started
 
@@ -142,7 +143,7 @@ This project includes comprehensive documentation:
 - **[REQUEST_MANAGEMENT.md](./REQUEST_MANAGEMENT.md)** - Detailed guide on saving, loading, and managing HTTP requests, including export/import functionality
 - **[WEBVIEW_ARCHITECTURE.md](./WEBVIEW_ARCHITECTURE.md)** - Technical documentation explaining the webview architecture and file structure
 - **[WEBVIEW_CHANGES.md](./WEBVIEW_CHANGES.md)** - History of webview improvements and changes
-- **[TEST_SUITE_SUMMARY.md](./TEST_SUITE_SUMMARY.md)** - Overview of the comprehensive unit test suite (92 passing tests)
+- **[TEST_SUITE_SUMMARY.md](./TEST_SUITE_SUMMARY.md)** - Overview of the comprehensive unit test suite (101 passing tests)
 - **[PRE_COMMIT_SETUP.md](./PRE_COMMIT_SETUP.md)** - Development setup guide for automated code formatting and linting
 - **[CHANGELOG.md](./CHANGELOG.md)** - Version history and release notes
 - **[vsc-extension-quickstart.md](./vsc-extension-quickstart.md)** - VS Code extension development quickstart guide

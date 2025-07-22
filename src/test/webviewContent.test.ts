@@ -84,7 +84,7 @@ suite('WebviewContent Test Suite', () => {
 
   test('getWebviewContent handles missing HTML file gracefully', () => {
     // Remove the HTML file
-    const htmlPath = path.join(tempDir, 'src', 'webview', 'index.html');
+    const htmlPath = path.join(tempDir, 'dist', 'webview', 'index.html');
     fs.unlinkSync(htmlPath);
 
     assert.throws(() => {
